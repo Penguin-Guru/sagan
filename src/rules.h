@@ -112,8 +112,8 @@ struct _Rule_Struct
 
     int direction;
 
-    bool flow_1_var;
-    bool flow_2_var;
+    bool a_has_address; // Was "flow_1_var".
+    bool b_has_address; // Was "flow_2_var".
     bool port_1_var;
     bool port_2_var;
 

@@ -1133,8 +1133,8 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
-                                    flexbit_ipc[a].src_port == config->sagan_port &&
-                                    flexbit_ipc[a].dst_port == config->sagan_port )
+                                    flexbit_ipc[a].src_port == config->default_port &&
+                                    flexbit_ipc[a].dst_port == config->default_port )
                                 {
 
 
@@ -1185,8 +1185,8 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             flexbit_ipc[flexbit_track_count].sid = rulestruct[rule_position].s_sid;
 
                             flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
-                            flexbit_track[flexbit_track_count].flexbit_srcport = config->sagan_port;
-                            flexbit_track[flexbit_track_count].flexbit_dstport = config->sagan_port;
+                            flexbit_track[flexbit_track_count].flexbit_srcport = config->default_port;
+                            flexbit_track[flexbit_track_count].flexbit_dstport = config->default_port;
                             flexbit_track_count++;
 
                         }
@@ -1211,7 +1211,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                     flexbit_ipc[a].src_port == src_port &&
-                                    flexbit_ipc[a].dst_port == config->sagan_port )
+                                    flexbit_ipc[a].dst_port == config->default_port )
                                 {
 
                                     File_Lock(config->shm_flexbit);
@@ -1256,7 +1256,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
                             flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
                             flexbit_track[flexbit_track_count].flexbit_srcport = src_port;
-                            flexbit_track[flexbit_track_count].flexbit_dstport = config->sagan_port;
+                            flexbit_track[flexbit_track_count].flexbit_dstport = config->default_port;
                             flexbit_track_count++;
 
                         }
@@ -1280,7 +1280,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
-                                    flexbit_ipc[a].src_port == config->sagan_port &&
+                                    flexbit_ipc[a].src_port == config->default_port &&
                                     flexbit_ipc[a].dst_port == dst_port )
                                 {
 
@@ -1325,7 +1325,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             strlcpy(flexbit_track[flexbit_track_count].flexbit_name, rulestruct[rule_position].flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
                             flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
-                            flexbit_track[flexbit_track_count].flexbit_srcport = config->sagan_port;
+                            flexbit_track[flexbit_track_count].flexbit_srcport = config->default_port;
                             flexbit_track[flexbit_track_count].flexbit_dstport = dst_port;
                             flexbit_track_count++;
 

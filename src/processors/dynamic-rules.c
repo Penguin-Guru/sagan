@@ -121,10 +121,10 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
                        ip_dst,
                        "",
                        "",
-                       config->sagan_proto,
+                       config->default_proto,
                        rulestruct[rule_position].s_sid,
-                       config->sagan_port,
-                       config->sagan_port,
+                       config->default_port,
+                       config->default_port,
                        rule_position, tp, NULL, 0 );
 
             /* Lock rules so other threads don't try to use it while we alter/load new rules */
@@ -169,10 +169,10 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
                        ip_dst,
                        "",
                        "",
-                       config->sagan_proto,
+                       config->default_proto,
                        rulestruct[rule_position].s_sid,
-                       config->sagan_port,
-                       config->sagan_port,
+                       config->default_port,
+                       config->default_port,
                        rule_position, tp, NULL, 0 );
 
         }

@@ -69,7 +69,7 @@ int Parse_Src_Port (char *msg)
     struct sockaddr_in sa;
     int result;
 
-    port = config->sagan_port;
+    port = config->default_port;
 
     char tmpmsg[MAX_SYSLOGMSG];
     snprintf(tmpmsg, sizeof(tmpmsg), "%s", msg);
@@ -250,7 +250,7 @@ int Parse_Dst_Port (char *msg)
 
     int i;
 
-    port = config->sagan_port;
+    port = config->default_port;
 
     char tmpmsg[MAX_SYSLOGMSG];
     snprintf(tmpmsg, sizeof(tmpmsg), "%s", msg);

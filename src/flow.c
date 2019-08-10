@@ -147,7 +147,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin flow_1*/
 
-    if(rulestruct[b].flow_1_var != 0)
+    if(rulestruct[b].a_has_address == true)
         {
             for(i=0; i < rulestruct[b].flow_1_counter; i++)
                 {
@@ -326,7 +326,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /* Begin flow_2 */
 
-    if(rulestruct[b].flow_2_var != 0)
+    if(rulestruct[b].b_has_address == true)
         {
 
             for(i=0; i < rulestruct[b].flow_2_counter; i++)

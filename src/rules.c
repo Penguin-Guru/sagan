@@ -354,9 +354,13 @@ void Load_Rules( const char *ruleset )
                     rc++;
                 }
 
-            if ( rc >= 6 )
+		if (!Sagan_strstr(rulebuf, "alert unknown ") && !Sagan_strstr(rulebuf, "drop unknown ")) {
+			rc++;
+		}
+
+            if ( rc >= 7 )
                 {
-                    Sagan_Log(WARN, "[%s, line %d] %s on line %d appears to not have a protocol type (any/tcp/udp/icmp/syslog), skipping rule", __FILE__, __LINE__, ruleset_fullname, linecount);
+                    Sagan_Log(WARN, "[%s, line %d] %s on line %d appears to not have a protocol type (any/tcp/udp/icmp/syslog/unknown), skipping rule", __FILE__, __LINE__, ruleset_fullname, linecount);
                     continue;
                 }
 
@@ -468,7 +472,12 @@ void Load_Rules( const char *ruleset )
 
                             else if (!strcmp(tokennet, "syslog"  ))
                                 {
-                                    rulestruct[counters->rulecount].ip_proto = config->sagan_proto;
+                                    rulestruct[counters->rulecount].ip_proto = config->default_proto;
+                                }
+
+                            else if (!strcmp(tokennet, "unknown"  ))
+                                {
+                                    rulestruct[counters->rulecount].ip_proto = 255;
                                 }
                         }
 
@@ -492,9 +501,13 @@ void Load_Rules( const char *ruleset )
 
                             if (!strcmp(flow_a, "any")) //  || !strcmp(flow_a, tokennet))
                                 {
-                                    rulestruct[counters->rulecount].flow_1_var = 0;	  /* 0 = any */
-
+                                    rulestruct[counters->rulecount].a_has_address = false;	  /* 0 = any */
                                 }
+                            else if (!strcmp(flow_a, "unknown")) //  || !strcmp(flow_a, tokennet))
+                                {
+                                    rulestruct[counters->rulecount].a_has_address = false;
+                                }
+
                             else
                                 {
 
@@ -561,7 +574,8 @@ void Load_Rules( const char *ruleset )
                                                 }
                                         }
 
-                                    rulestruct[counters->rulecount].flow_1_var = 1;   /* 1 = var */
+                                    // rulestruct[counters->rulecount].flow_1_var = 1;   /* 1 = var */
+                                    rulestruct[counters->rulecount].a_has_address = true;
                                     rulestruct[counters->rulecount].flow_1_counter = flow_1_count;
                                 }
                         }
@@ -681,9 +695,15 @@ void Load_Rules( const char *ruleset )
 
                             if (!strcmp(flow_b, "any")) //  || !strcmp(flow_b, tokennet))
                                 {
-                                    rulestruct[counters->rulecount].flow_2_var = 0;     /* 0 = any */
-
+                                    // rulestruct[counters->rulecount].flow_2_var = 0;     /* 0 = any */
+                                    rulestruct[counters->rulecount].b_has_address = false;
                                 }
+
+                            else if (!strcmp(flow_b, "unknown")) //  || !strcmp(flow_b, tokennet))
+                                {
+                                    rulestruct[counters->rulecount].b_has_address = false;
+                                }
+
                             else
                                 {
 
@@ -745,7 +765,8 @@ void Load_Rules( const char *ruleset )
                                                 }
                                         }
 
-                                    rulestruct[counters->rulecount].flow_2_var = 1;   /* 1 = var */
+                                    // rulestruct[counters->rulecount].flow_2_var = 1;   /* 1 = var */
+                                    rulestruct[counters->rulecount].b_has_address = true;
                                     rulestruct[counters->rulecount].flow_2_counter = flow_2_count;
                                 }
                         }
@@ -827,7 +848,7 @@ void Load_Rules( const char *ruleset )
                     /* Used later for a single check to determine if a rule has a flow or not
                         - Champ Clark III (06/12/2016) */
 
-                    if ( rulestruct[counters->rulecount].ip_proto != 0 || rulestruct[counters->rulecount].flow_1_var != 0 || rulestruct[counters->rulecount].port_1_var != 0 || rulestruct[counters->rulecount].flow_2_var != 0 || rulestruct[counters->rulecount].port_2_var != 0 )
+                    if ( rulestruct[counters->rulecount].ip_proto != 0 || rulestruct[counters->rulecount].a_has_address == true || rulestruct[counters->rulecount].port_1_var != 0 || rulestruct[counters->rulecount].b_has_address == true || rulestruct[counters->rulecount].port_2_var != 0 )
                         {
                             rulestruct[counters->rulecount].has_flow = 1;
                         }
@@ -850,9 +871,9 @@ void Load_Rules( const char *ruleset )
 
             /* Set some defaults outside the option parsing */
 
-            rulestruct[counters->rulecount].default_proto = config->sagan_proto;
-            rulestruct[counters->rulecount].default_src_port = config->sagan_port;
-            rulestruct[counters->rulecount].default_dst_port = config->sagan_port;
+            rulestruct[counters->rulecount].default_proto = config->default_proto;
+            rulestruct[counters->rulecount].default_src_port = config->default_port;
+            rulestruct[counters->rulecount].default_dst_port = config->default_port;
 
             tokenrule = strtok_r(rulestring, ";", &saveptrrule1);
 

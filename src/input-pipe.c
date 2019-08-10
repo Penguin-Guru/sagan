@@ -83,12 +83,12 @@ void SyslogInput_Pipe( char *syslog_string, struct _SyslogInput *SyslogInput )
 
                             rc = DNS_Lookup(ptr, src_dns_lookup, sizeof(src_dns_lookup));
 
-                            /* Invalid lookups get the config->sagan_host value */
+                            /* Invalid lookups get the default_address */
 
                             if ( rc == -1 )
                                 {
 
-                                    strlcpy(src_dns_lookup, config->sagan_host, sizeof(src_dns_lookup));
+                                    strlcpy(src_dns_lookup, config->default_address, sizeof(src_dns_lookup));
                                     counters->dns_miss_count++;
 
                                 }
@@ -124,13 +124,14 @@ void SyslogInput_Pipe( char *syslog_string, struct _SyslogInput *SyslogInput )
 
             if ( ptr == NULL || !Is_IP(ptr, IPv4) || !Is_IP(ptr, IPv6) )
                 {
-                    strlcpy(SyslogInput->syslog_host, config->sagan_host, sizeof(SyslogInput->syslog_host));
+			// This may be the place to grab remote syslog server address.
+                    strlcpy(SyslogInput->syslog_host, config->default_address, sizeof(SyslogInput->syslog_host));
 
                     counters->malformed_host++;
 
                     if ( debug->debugmalformed )
                         {
-                            Sagan_Log(DEBUG, "Sagan received a malformed 'host': '%s' (replaced with %s)", SyslogInput->syslog_host, config->sagan_host);
+                            Sagan_Log(DEBUG, "Sagan received a malformed 'host': '%s' (replaced with %s)", SyslogInput->syslog_host, config->default_address);
                             Sagan_Log(DEBUG, "Raw malformed log: \"%s\"", syslog_string);
                         }
                 }

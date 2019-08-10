@@ -266,7 +266,7 @@ void Format_JSON_Log_EVE( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, struct time
     json_object *jsyslog_host = json_object_new_string(SaganProcSyslog_LOCAL->syslog_host);
     json_object_object_add(jobj,"syslog_source", jsyslog_host);
 
-    json_object *jsyslog_proto = json_object_new_string(config->sagan_proto_string);
+    json_object *jsyslog_proto = json_object_new_string(config->default_proto_string);
     json_object_object_add(jobj,"syslog_proto", jsyslog_proto);
 
     json_object *jsyslog_facility = json_object_new_string(SaganProcSyslog_LOCAL->syslog_facility);

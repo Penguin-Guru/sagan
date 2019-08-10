@@ -123,7 +123,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
     int num_dots = 0;
     int num_hashes = 0;
 
-    int port = config->sagan_port;
+    int port = config->default_port;
 
     for (i=0; i<strlen(syslog_message); i++)
         {
@@ -304,7 +304,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                                             if ( port == 0 )
                                                 {
-                                                    lookup_cache[current_position].port = config->sagan_port;
+                                                    lookup_cache[current_position].port = config->default_port;
 
                                                 }
                                             else
@@ -350,7 +350,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                                                     if ( port == 0 )
                                                         {
 
-                                                            lookup_cache[current_position].port = config->sagan_port;
+                                                            lookup_cache[current_position].port = config->default_port;
 
                                                         }
                                                     else
@@ -396,7 +396,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                                                     if ( port == 0 )
                                                         {
 
-                                                            lookup_cache[current_position].port = config->sagan_port;
+                                                            lookup_cache[current_position].port = config->default_port;
 
                                                         }
                                                     else
@@ -449,7 +449,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                             memcpy(lookup_cache[current_position].ip, ptr1, MAXIP);
                             memset(lookup_cache[current_position].ip_bits, 0, MAXIPBIT);
                             IP2Bit(ptr1, lookup_cache[current_position].ip_bits);
-                            lookup_cache[current_position].port = config->sagan_port;
+                            lookup_cache[current_position].port = config->default_port;
                             lookup_cache[current_position].status = 1;
 
                             current_position++;
@@ -496,7 +496,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                             if ( port == 0 )
                                 {
-                                    lookup_cache[current_position].port = config->sagan_port;
+                                    lookup_cache[current_position].port = config->default_port;
                                 }
                             else
                                 {
@@ -530,7 +530,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                             memcpy(lookup_cache[current_position].ip, ip_2, MAXIP);
                             memset(lookup_cache[current_position].ip_bits, 0, MAXIPBIT);
                             IP2Bit(ip_2, lookup_cache[current_position].ip_bits);
-                            lookup_cache[current_position].port = config->sagan_port;
+                            lookup_cache[current_position].port = config->default_port;
                             lookup_cache[current_position].status = 1;
 
                             current_position++;
@@ -577,7 +577,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                             if ( port == 0 )
                                 {
-                                    lookup_cache[current_position].port = config->sagan_port;
+                                    lookup_cache[current_position].port = config->default_port;
                                 }
                             else
                                 {
@@ -613,7 +613,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                             memcpy(lookup_cache[current_position].ip, ip_2, MAXIP);
                             memset(lookup_cache[current_position].ip_bits, 0, MAXIPBIT);
                             IP2Bit(ip_2, lookup_cache[current_position].ip_bits);
-                            lookup_cache[current_position].port = config->sagan_port;
+                            lookup_cache[current_position].port = config->default_port;
                             lookup_cache[current_position].status = 1;
 
                             current_position++;
@@ -707,7 +707,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                                                         }
                                                     else
                                                         {
-                                                            lookup_cache[current_position].port = config->sagan_port;
+                                                            lookup_cache[current_position].port = config->default_port;
                                                         }
 
                                                 }
@@ -748,7 +748,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                                                             if ( port == 0 )
                                                                 {
-                                                                    lookup_cache[current_position].port = config->sagan_port;
+                                                                    lookup_cache[current_position].port = config->default_port;
                                                                 }
                                                             else
                                                                 {
@@ -780,7 +780,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                                             if ( port_test_int == 0 )
                                                 {
-                                                    lookup_cache[current_position].port = config->sagan_port;
+                                                    lookup_cache[current_position].port = config->default_port;
                                                 }
                                             else
                                                 {
@@ -851,7 +851,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                                         }
 
-                                    lookup_cache[current_position].port = config->sagan_port;
+                                    lookup_cache[current_position].port = config->default_port;
                                     lookup_cache[current_position].status = 1;
 
                                     current_position++;
@@ -898,7 +898,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
 
                                     if ( port == 0 )
                                         {
-                                            lookup_cache[current_position].port = config->sagan_port;
+                                            lookup_cache[current_position].port = config->default_port;
 
                                         }
                                     else
@@ -937,7 +937,7 @@ int Parse_IP( char *syslog_message, struct _Sagan_Lookup_Cache_Entry *lookup_cac
                                     memcpy(lookup_cache[current_position].ip, ip_2, MAXIP);
                                     memset(lookup_cache[current_position].ip_bits, 0, MAXIPBIT);
                                     IP2Bit(ip_2, lookup_cache[current_position].ip_bits);
-                                    lookup_cache[current_position].port = config->sagan_port;
+                                    lookup_cache[current_position].port = config->default_port;
                                     lookup_cache[current_position].status = 1;
 
                                     current_position++;

@@ -193,8 +193,9 @@ void Load_YAML_Config( char *yaml_file )
 #endif
 
 
-            config->sagan_host[0] = '\0';
-            config->sagan_port = 514;
+            strcpy(config->default_address , "0.0.0.0");
+            config->default_port = 0;
+            config->change_localhosts = false;
             config->input_type = INPUT_PIPE;
 
             /* Defaults for Parse_IP(); */
@@ -214,7 +215,7 @@ void Load_YAML_Config( char *yaml_file )
 
             config->pp_sagan_track_clients = TRACK_TIME;
 
-            config->sagan_proto = 17;           /* Default to UDP */
+            config->default_proto = 255;           /* Default to UNKNOWN */
             config->max_processor_threads = MAX_PROCESSOR_THREADS;
 
             config->eve_fd              = -1;
@@ -613,21 +614,35 @@ void Load_YAML_Config( char *yaml_file )
                                             strlcpy(config->sagan_cluster_name, value, sizeof(config->sagan_cluster_name));
                                         }
 
-                                    else if (!strcmp(last_pass, "default-host"))
+                                    else if (!strcmp(last_pass, "sagan-host"))
                                         {
                                             strlcpy(config->sagan_host, value, sizeof(config->sagan_host));
                                         }
+
+                                    if (!strcmp(last_pass, "default-address")) {
+                                        strlcpy(config->default_address, value, sizeof(config->default_address));
+                                    }
+
+                                    if (!strcmp(last_pass, "change-localhosts")) {
+                                        if ( value ) {
+                                          config->change_localhosts = true;
+                                        } else {
+                                            config->change_localhosts = false;
+                                        }
+                                    }
 
                                     else if (!strcmp(last_pass, "default-port"))
                                         {
 
                                             Var_To_Value(value, tmp, sizeof(tmp));
-                                            config->sagan_port = atoi(tmp);
+                                            config->default_port = atoi(tmp);
 
-                                            if ( config->sagan_port == 0 )
+					/* Hopefully this isn't important.
+                                            if ( config->default_port == 0 )
                                                 {
                                                     Sagan_Log(ERROR, "[%s, line %d] sagan:core 'default-port' is set to zero. Abort!", __FILE__, __LINE__);
                                                 }
+					*/
                                         }
 
 
@@ -742,26 +757,31 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( !strcasecmp(value, "udp") )
                                                 {
-                                                    config->sagan_proto = 17;
-                                                    config->sagan_proto_string = "UDP";
+                                                    config->default_proto = 17;
+                                                    config->default_proto_string = "UDP";
                                                 }
 
                                             else if ( !strcasecmp(value, "tcp") )
                                                 {
-                                                    config->sagan_proto = 6;
-                                                    config->sagan_proto_string = "TCP";
+                                                    config->default_proto = 6;
+                                                    config->default_proto_string = "TCP";
                                                 }
 
                                             else if ( !strcasecmp(value, "icmp") )
                                                 {
-                                                    config->sagan_proto = 1;
-                                                    config->sagan_proto_string = "ICMP";
+                                                    config->default_proto = 1;
+                                                    config->default_proto_string = "ICMP";
                                                 }
+
+                                            else if ( !strcasecmp(value, "unknown") ) {
+						config->default_proto = 255;
+						config->default_proto_string = "UNKNOWN";
+						}
 
                                             else if ( strcasecmp(value, "tcp") && strcasecmp(value, "udp") )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'default_proto' can only be TCP, UDP or ICMP.", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'default_proto' can only be TCP, UDP, ICMP, or UNKNOWN.", __FILE__, __LINE__);
 
                                                 }
 
@@ -2718,6 +2738,11 @@ void Load_YAML_Config( char *yaml_file )
     if ( config->sagan_host[0] == '\0' )
         {
             Sagan_Log(ERROR, "[%s, line %d] The 'sagan_host' option was not found and is required.", __FILE__, __LINE__);
+        }
+
+    if ( config->default_address[0] == '\0' )
+        {
+            Sagan_Log(ERROR, "[%s, line %d] The 'default_address' option was not found and is (probably) required.", __FILE__, __LINE__);
         }
 
 #ifdef HAVE_LIBHIREDIS

@@ -281,10 +281,10 @@ void Track_Clients_Thread ( void )
                                                config->sagan_host,
                                                "\0",
                                                "\0",
-                                               config->sagan_proto,
+                                               config->default_proto,
                                                alertid,
-                                               config->sagan_port,
-                                               config->sagan_port,
+                                               config->default_port,
+                                               config->default_port,
                                                0, tp, NULL, 0);
                                 } /* End last seen check time */
 
@@ -348,10 +348,10 @@ void Track_Clients_Thread ( void )
                                                config->sagan_host,
                                                "\0",
                                                "\0",
-                                               config->sagan_proto,
+                                               config->default_proto,
                                                alertid,
-                                               config->sagan_port,
-                                               config->sagan_port,
+                                               config->default_port,
+                                               config->default_port,
                                                0, tp, NULL, 0);
 
                                 }  /* End of existing utime check */

@@ -445,11 +445,13 @@ int DNS_Lookup( char *host, char *str, size_t size )
 
     /* Short circuit if it's a "localhost" lookup */
 
-    if ( !strcmp(host, "localhost" ) )
-        {
-            snprintf(str, size, "%s", config->sagan_host);
-            return(0);
-        }
+    if ( config->change_localhosts == true ) {
+        if ( !strcmp(host, "localhost" ) )
+            {
+                snprintf(str, size, "%s", config->sagan_host);
+                return(0);
+            }
+    }
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;     /* AF_INET or AF_INET6 to force version */

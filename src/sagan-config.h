@@ -99,6 +99,8 @@ struct _SaganConfig
     bool         sagan_is_file;                       /* FIFO or FILE */
     char         sagan_log_path[MAXPATH];
     char         sagan_rule_path[MAXPATH];
+    bool         change_localhosts;	// True disables replacement of localhost addresses.
+    char         default_address[MAXHOST];	// Used as place-holder for logs not including source and/or destination.
     char         sagan_host[MAXHOST];
     char         sagan_startutime[20];                  /* Records utime at startup */
     char         home_net[MAXPATH];
@@ -115,11 +117,11 @@ struct _SaganConfig
     int          max_processor_threads;
     int		 max_batch;
 
-    int          sagan_port;
+    int          default_port;
     bool         disable_dns_warnings;
     bool         syslog_src_lookup;
-    int          sagan_proto;
-    char 	 *sagan_proto_string;
+    int          default_proto;
+    char 	 *default_proto_string;
 
     bool	 pcre_jit; 				/* For PCRE JIT support testing */
 
