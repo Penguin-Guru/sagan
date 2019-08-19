@@ -21,10 +21,11 @@ vars:
 
   sagan-groups: 
 
-    FIFO: "/var/sagan/fifo/sagan.fifo"
-    RULE_PATH: "/usr/local/etc/sagan-rules"
     LOCKFILE: "/var/run/sagan/sagan.pid"
+    FIFO: "/var/spool/sagan/input.fifo"
     LOG_PATH: "/var/log/sagan"	
+    CONF_PATH: "/etc/sagan"
+    RULE_PATH: "/etc/sagan/rules"
 
   # HOME_NET and EXTERNAL_NET function similar to Suricata/Snort.  However, 
   # it's rare you'll want to set them.  In most situations leaving it set
@@ -123,17 +124,19 @@ sagan-core:
 
     sensor-name: "default_sensor_name"   # Unique name for this sensor (no spaces)
     cluster-name: "default_cluster_name" # Cluster name (no spaces)
-    default-host: 192.168.2.1
-    default-port: 514
-    default-proto: udp
-    dns-warnings: disabled
+    #sagan-host: 192.168.2.1    ## This is commented out to prevent users running before setting.
+    change-localhosts: no
+    default-address: 0.0.0.0
+    default-port: 0
+    default-proto: unknown
+    dns-warnings: enabled
     source-lookup: disabled		
     fifo-size: 1048576		# System must support F_GETPIPE_SZ/F_SETPIPE_SZ. 
     max-threads: 100
-    classification: "$RULE_PATH/classification.config"
-    reference: "$RULE_PATH/reference.config"
-    gen-msg-map: "$RULE_PATH/gen-msg.map"
-    protocol-map: "$RULE_PATH/protocol.map"
+    classification: "$CONF_PATH/classification.config"
+    reference: "$CONF_PATH/reference.config"
+    gen-msg-map: "$CONF_PATH/gen-msg.map"
+    protocol-map: "$CONF_PATH/protocol.map"
     xbit-storage: mmap             # "redis" or "mmap"
 
     # Sagan can sends logs in "batches" for performance reasons. In most 
@@ -156,7 +159,7 @@ sagan-core:
     # and "json-software" have no function.
 
     input-type: pipe                       # pipe or json
-    json-map: "$RULE_PATH/json-input.map"  # mapping file if input-type: json
+    json-map: "$CONF_PATH/json-input.map"  # mapping file if input-type: json
     json-software: syslog-ng               # by "software" type. 
 
     # "parse-json-message" allows Sagan to detect and decode JSON within a 
@@ -170,7 +173,7 @@ sagan-core:
 
     parse-json-message: disable
     parse-json-program: disable
-    json-message-map: "$RULE_PATH/json-message.map"
+    json-message-map: "$CONF_PATH/json-message.map"
 
   # This controls how the "parse_src_ip" and "parse_dst_ip" function within a rule. 
    
@@ -225,7 +228,7 @@ sagan-core:
   ignore-list: 
 
     enabled: no
-    ignore-file: "$RULE_PATH/sagan-ignore-list.txt"
+    ignore-file: "$CONF_PATH/sagan-ignore-list.txt"
 
   # Maxmind GeoIP2 support allows Sagan to categorize events by their country
   # code. For example; a rule can be created to track "authentication 
@@ -246,7 +249,7 @@ sagan-core:
   geoip: 
    
     enabled: no
-    country_database: "/usr/local/share/GeoIP2/GeoLite2-Country.mmdb"
+    country_database: "/var/lib/GeoIP2/GeoLite2-Country.mmdb"
     skip_networks: "8.8.8.8/32, 8.8.4.4/32"
 
   # Liblognorm is a fast sample-base log normalization library.  Sagan uses
@@ -262,7 +265,7 @@ sagan-core:
   liblognorm: 
  
     enabled: yes
-    normalize_rulebase: "$RULE_PATH/normalization.rulebase"
+    normalize_rulebase: "$CONF_PATH/normalization.rulebase"
 
   # 'Plog',  the promiscuous syslog injector, allows Sagan to 'listen' on a
   # network interface and 'suck' UDP syslog message off the wire.  When a 
@@ -296,7 +299,7 @@ processors:
   # created. 
 
   - track-clients:
-      enabled: no
+      enabled: yes
       timeout: 1440		# In minutes
 
   # This reports on rule sets that have and have not "fired".  This can be 
@@ -330,7 +333,7 @@ processors:
 
   - blacklist: 
       enabled: no
-      filename: "$RULE_PATH/blacklist.txt"
+      filename: "$CONF_PATH/blacklist/blacklist.txt"
  
   # The "bluedot" processor extracts information from logs (URLs, file hashes,
   # IP address) and queries the Quadrant Information Security "Bluedot" threat
@@ -343,7 +346,7 @@ processors:
       enabled: no
       device-id: "Device_ID"
       cache-timeout: 120
-      categories: "$RULE_PATH/bluedot-categories.conf"
+      categories: "$CONF_PATH/bluedot-categories.conf"
 
       max-ip-cache: 300000
       max-hash-cache: 10000
@@ -610,127 +613,127 @@ rules-files:
   # Correlated rules - Rules that use xbits/flexbits to detect malicious behavor #
   ################################################################################
 
-  - $RULE_PATH/cisco-correlated.rules
-  - $RULE_PATH/citrix-correlated.rules
-  - $RULE_PATH/courier-correlated.rules
-  - $RULE_PATH/fatpipe-correlated.rules
-  - $RULE_PATH/fortinet-correlated.rules
-  - $RULE_PATH/imapd-correlated.rules
-  - $RULE_PATH/openssh-correlated.rules
-  - $RULE_PATH/ssh-tectia-server-correlated.rules
-  - $RULE_PATH/vmware-correlated.rules
-  - $RULE_PATH/vsftpd-correlated.rules
-  - $RULE_PATH/windows-correlated.rules
-  - $RULE_PATH/windows-owa-correlated.rules
+  #- $RULE_PATH/cisco-correlated.rules
+  #- $RULE_PATH/citrix-correlated.rules
+  #- $RULE_PATH/courier-correlated.rules
+  #- $RULE_PATH/fatpipe-correlated.rules
+  #- $RULE_PATH/fortinet-correlated.rules
+  #- $RULE_PATH/imapd-correlated.rules
+  #- $RULE_PATH/openssh-correlated.rules
+  #- $RULE_PATH/ssh-tectia-server-correlated.rules
+  #- $RULE_PATH/vmware-correlated.rules
+  #- $RULE_PATH/vsftpd-correlated.rules
+  #- $RULE_PATH/windows-correlated.rules
+  #- $RULE_PATH/windows-owa-correlated.rules
 
   #############################################################################
   # Standard rules - Rules that do not require any dependencies.              #
   #############################################################################
 
   #- $RULE_PATH/as400.rules
-  - $RULE_PATH/adtran.rules
-  - $RULE_PATH/apache.rules
-  - $RULE_PATH/apc-emu.rules
-  - $RULE_PATH/arp.rules
+  #- $RULE_PATH/adtran.rules
+  #- $RULE_PATH/apache.rules
+  #- $RULE_PATH/apc-emu.rules
+  #- $RULE_PATH/arp.rules
   #- $RULE_PATH/artillery.rules
-  - $RULE_PATH/asterisk.rules
-  - $RULE_PATH/attack.rules
-  - $RULE_PATH/barracuda.rules
-  - $RULE_PATH/bash.rules
-  - $RULE_PATH/bind.rules
-  - $RULE_PATH/carbonblack.rules
-  - $RULE_PATH/bonding.rules
-  - $RULE_PATH/bro-ids.rules
-  - $RULE_PATH/cacti-thold.rules
+  #- $RULE_PATH/asterisk.rules
+  #- $RULE_PATH/attack.rules
+  #- $RULE_PATH/barracuda.rules
+  #- $RULE_PATH/bash.rules
+  #- $RULE_PATH/bind.rules
+  #- $RULE_PATH/carbonblack.rules
+  #- $RULE_PATH/bonding.rules
+  #- $RULE_PATH/bro-ids.rules
+  #- $RULE_PATH/cacti-thold.rules
   #- $RULE_PATH/cisco-acs.rules
-  - $RULE_PATH/cisco-ise.rules
-  - $RULE_PATH/cisco-cucm.rules
-  - $RULE_PATH/cisco-ios.rules
-  - $RULE_PATH/cisco-meraki.rules
-  - $RULE_PATH/cisco-pixasa.rules
+  #- $RULE_PATH/cisco-ise.rules
+  #- $RULE_PATH/cisco-cucm.rules
+  #- $RULE_PATH/cisco-ios.rules
+  #- $RULE_PATH/cisco-meraki.rules
+  #- $RULE_PATH/cisco-pixasa.rules
   #- $RULE_PATH/cisco-prime.rules
   #- $RULE_PATH/cisco-sdee.rules
-  - $RULE_PATH/cisco-wlc.rules
-  - $RULE_PATH/citrix.rules
-  - $RULE_PATH/courier.rules
-  - $RULE_PATH/cylance.rules
+  #- $RULE_PATH/cisco-wlc.rules
+  #- $RULE_PATH/citrix.rules
+  #- $RULE_PATH/courier.rules
+  #- $RULE_PATH/cylance.rules
   #- $RULE_PATH/deleted.rules
   #- $RULE_PATH/digitalpersona.rules
-  - $RULE_PATH/dovecot.rules
-  - $RULE_PATH/f5-big-ip.rules
-  - $RULE_PATH/fatpipe.rules
-  - $RULE_PATH/fipaypin.rules
-  - $RULE_PATH/fortinet.rules
-  - $RULE_PATH/ftpd.rules
+  #- $RULE_PATH/dovecot.rules
+  #- $RULE_PATH/f5-big-ip.rules
+  #- $RULE_PATH/fatpipe.rules
+  #- $RULE_PATH/fipaypin.rules
+  #- $RULE_PATH/fortinet.rules
+  #- $RULE_PATH/ftpd.rules
   #- $RULE_PATH/grsec.rules
-  - $RULE_PATH/honeyd.rules
+  #- $RULE_PATH/honeyd.rules
   #- $RULE_PATH/hordeimp.rules
   #- $RULE_PATH/hostapd.rules
-  - $RULE_PATH/huawei.rules
-  - $RULE_PATH/imapd.rules
-  - $RULE_PATH/ipop3d.rules
-  - $RULE_PATH/juniper.rules
+  #- $RULE_PATH/huawei.rules
+  #- $RULE_PATH/imapd.rules
+  #- $RULE_PATH/ipop3d.rules
+  #- $RULE_PATH/juniper.rules
   #- $RULE_PATH/kismet.rules
-  - $RULE_PATH/knockd.rules
-  - $RULE_PATH/linux-kernel.rules
-  - $RULE_PATH/milter.rules
-  - $RULE_PATH/mongodb.rules
-  - $RULE_PATH/mysql.rules
-  - $RULE_PATH/nexpose.rules
-  - $RULE_PATH/nfcapd.rules
-  - $RULE_PATH/nginx.rules
-  - $RULE_PATH/ntp.rules
-  - $RULE_PATH/openssh.rules
-  - $RULE_PATH/openvpn.rules
-  - $RULE_PATH/oracle.rules
+  #- $RULE_PATH/knockd.rules
+  #- $RULE_PATH/linux-kernel.rules
+  #- $RULE_PATH/milter.rules
+  #- $RULE_PATH/mongodb.rules
+  #- $RULE_PATH/mysql.rules
+  #- $RULE_PATH/nexpose.rules
+  #- $RULE_PATH/nfcapd.rules
+  #- $RULE_PATH/nginx.rules
+  #- $RULE_PATH/ntp.rules
+  #- $RULE_PATH/openssh.rules
+  #- $RULE_PATH/openvpn.rules
+  #- $RULE_PATH/oracle.rules
   #- $RULE_PATH/ossec-mi.rules
   #- $RULE_PATH/ossec.rules
-  - $RULE_PATH/palo-alto.rules
-  - $RULE_PATH/php.rules
-  - $RULE_PATH/postfix.rules
-  - $RULE_PATH/postgresql.rules
-  - $RULE_PATH/pptp.rules
-  - $RULE_PATH/procurve.rules
-  - $RULE_PATH/proftpd.rules
-  - $RULE_PATH/pure-ftpd.rules
-  - $RULE_PATH/racoon.rules
-  - $RULE_PATH/riverbed.rules
-  - $RULE_PATH/roundcube.rules
-  - $RULE_PATH/rsync.rules
-  - $RULE_PATH/samba.rules
-  - $RULE_PATH/sendmail.rules
-  - $RULE_PATH/snort.rules
-  - $RULE_PATH/solaris.rules
-  - $RULE_PATH/sonicwall.rules
-  - $RULE_PATH/squid.rules
-  - $RULE_PATH/ssh-tectia-server.rules
-  - $RULE_PATH/su.rules
-  - $RULE_PATH/symantec-ems.rules
-  - $RULE_PATH/syslog.rules
-  - $RULE_PATH/tcp.rules
-  - $RULE_PATH/telnet.rules
-  - $RULE_PATH/trendmicro.rules
-  - $RULE_PATH/tripwire.rules
-  - $RULE_PATH/vmpop3d.rules
-  - $RULE_PATH/vmware.rules
-  - $RULE_PATH/vpopmail.rules
-  - $RULE_PATH/vsftpd.rules
-  - $RULE_PATH/web-attack.rules
+  #- $RULE_PATH/palo-alto.rules
+  #- $RULE_PATH/php.rules
+  #- $RULE_PATH/postfix.rules
+  #- $RULE_PATH/postgresql.rules
+  #- $RULE_PATH/pptp.rules
+  #- $RULE_PATH/procurve.rules
+  #- $RULE_PATH/proftpd.rules
+  #- $RULE_PATH/pure-ftpd.rules
+  #- $RULE_PATH/racoon.rules
+  #- $RULE_PATH/riverbed.rules
+  #- $RULE_PATH/roundcube.rules
+  #- $RULE_PATH/rsync.rules
+  #- $RULE_PATH/samba.rules
+  #- $RULE_PATH/sendmail.rules
+  #- $RULE_PATH/snort.rules
+  #- $RULE_PATH/solaris.rules
+  #- $RULE_PATH/sonicwall.rules
+  #- $RULE_PATH/squid.rules
+  #- $RULE_PATH/ssh-tectia-server.rules
+  #- $RULE_PATH/su.rules
+  #- $RULE_PATH/symantec-ems.rules
+  #- $RULE_PATH/syslog.rules
+  #- $RULE_PATH/tcp.rules
+  #- $RULE_PATH/telnet.rules
+  #- $RULE_PATH/trendmicro.rules
+  #- $RULE_PATH/tripwire.rules
+  #- $RULE_PATH/vmpop3d.rules
+  #- $RULE_PATH/vmware.rules
+  #- $RULE_PATH/vpopmail.rules
+  #- $RULE_PATH/vsftpd.rules
+  #- $RULE_PATH/web-attack.rules
   #- $RULE_PATH/weblabrinth.rules
-  - $RULE_PATH/windows-applocker.rules
-  - $RULE_PATH/windows-auth.rules
-  - $RULE_PATH/windows-emet.rules
-  - $RULE_PATH/windows-misc.rules
-  - $RULE_PATH/windows-mssql.rules
-  - $RULE_PATH/windows-security.rules
-  - $RULE_PATH/windows-owa.rules
-  - $RULE_PATH/windows.rules
-  - $RULE_PATH/windows-sysmon.rules
-  - $RULE_PATH/wordpress.rules
-  - $RULE_PATH/xinetd.rules
-  - $RULE_PATH/yubikey.rules
-  - $RULE_PATH/zeus.rules
-  - $RULE_PATH/zimbra.rules
+  #- $RULE_PATH/windows-applocker.rules
+  #- $RULE_PATH/windows-auth.rules
+  #- $RULE_PATH/windows-emet.rules
+  #- $RULE_PATH/windows-misc.rules
+  #- $RULE_PATH/windows-mssql.rules
+  #- $RULE_PATH/windows-security.rules
+  #- $RULE_PATH/windows-owa.rules
+  #- $RULE_PATH/windows.rules
+  #- $RULE_PATH/windows-sysmon.rules
+  #- $RULE_PATH/wordpress.rules
+  #- $RULE_PATH/xinetd.rules
+  #- $RULE_PATH/yubikey.rules
+  #- $RULE_PATH/zeus.rules
+  #- $RULE_PATH/zimbra.rules
 
 #
 # Include other configs

@@ -661,7 +661,8 @@ if test "$SNORTSAM" = "yes"; then
 
 
 test "x$prefix" = x. || test "x$prefix" = xNONE && prefix=/usr/local
-AC_DEFINE_UNQUOTED(CONFIG_FILE_PATH, "`eval echo "${sysconfdir}/sagan.yaml"`", [Sagan configuration file]) 
+#AC_DEFINE_UNQUOTED(CONFIG_FILE_PATH, "`eval echo "${DESTDIR}${sysconfdir}/sagan/sagan.yaml"`", [Sagan configuration file]) 
+AC_DEFINE_UNQUOTED(CONFIG_FILE_PATH, "`eval echo "${sysconfdir}/sagan/sagan.yaml"`", [Sagan configuration file]) 
 
 AC_DEFINE_UNQUOTED(PACKAGE_NAME, "sagan" )
 AC_DEFINE_UNQUOTED(PACKAGE_STRING, "Sagan $VERSION")

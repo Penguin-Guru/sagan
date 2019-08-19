@@ -74,7 +74,7 @@ typedef void json_object;
 #define JSON_MAX_SIZE	      10240
 
 
-#define DEFAULT_JSON_INPUT_MAP          "/usr/local/etc/sagan-rules/json-input.map"
+#define DEFAULT_JSON_INPUT_MAP          "/usr/local/etc/sagan/json-input.map"
 #define INPUT_PIPE                      1
 #define INPUT_JSON                      2
 
@@ -128,10 +128,10 @@ typedef void json_object;
 #define MAXIPBIT	     	16		/* Max IP length in bytes */
 
 #define LOCKFILE 		"/var/run/sagan/sagan.pid"
-#define SAGANLOG		"/var/log/sagan/sagan.log"
+#define FIFO			"/var/spool/sagan/sagan.fifo"
 #define SAGANLOGPATH		"/var/log/sagan"
-#define FIFO			"/var/run/sagan.fifo"
-#define RULE_PATH		"/usr/local/etc/sagan-rules"
+#define SAGANLOG		"/var/log/sagan/sagan.log"
+#define RULE_PATH		"/etc/sagan/rules"	// Should probably be left in /usr/local/
 
 #define HOME_NET		"any"
 #define EXTERNAL_NET		"any"

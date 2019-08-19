@@ -91,6 +91,129 @@ struct _Rule_Struct *rulestruct = NULL;
 struct _Class_Struct *classstruct = NULL;
 struct _Sagan_Ruleset_Track *Ruleset_Track = NULL;
 
+void ParseRuleHead(char *rulebuf, int headbuf_length) {
+	char headbuf[headbuf_length];
+
+	strlcat(headbuf, rulebuf, headbuf_length);
+	Sagan_Log(NORMAL, "headbuf = \"%s\" ", headbuf);
+}
+
+void ParseRuleBody(char *rulebuf, int bb_begin, int bb_end) {
+	int bodybuf_length = bb_end - bb_begin;
+	char bodybuf[bodybuf_length];
+
+	strlcat(bodybuf, rulebuf, bodybuf_length);
+	Sagan_Log(NORMAL, "bodybuf = \"%s\" ", bodybuf);
+}
+
+void ParseRule(char *rulebuf, int rulebuf_length) {
+	int i=0;
+	int begin;
+	int end;
+	char netstr[RULEBUF] = { 0 };
+	char rulestr[RULEBUF] = { 0 };
+	char tmp[2] = { 0 };
+	//char rulebuf[RULEBUF] = { 0 };
+	char *rulestring;
+	char *netstring;
+
+	/* Parse forward for first '(' */
+	for (i=0; i<strlen(rulebuf); i++) {
+		if ( rulebuf[i] == '(' ) {
+			begin = i;
+			break;
+		}
+	}
+
+	/* Parse reverse for the first ')' */
+	for (i=strlen(rulebuf); i>0; i--) {
+		if ( rulebuf[i] == ')' ) {
+			end = i;
+			break;
+		}
+	}
+
+	/* Get rule body/structure, between parentheses */
+	for (i=begin+1; i<end; i++) {
+		snprintf(tmp, sizeof(tmp), "%c", rulebuf[i]);
+		strlcat(rulestr, tmp, sizeof(rulestr));
+		/* There has to be a better way of doing that... */
+		//strlcat(rulestr, rulebuf[i], sizeof(rulestr));
+		//snprintf(rulestr, sizeof(rulestr), "%c", rulebuf[i]);
+	}
+
+	/* Get action and network target, before rule */
+	for (i=0; i<begin; i++) {
+		snprintf(tmp, sizeof(tmp), "%c", rulebuf[i]);
+		strlcat(netstr, tmp, sizeof(netstr));
+	}
+
+	/* Assign pointers to values */
+	netstring = netstr;	// Consider renaming to header or target.
+	rulestring = rulestr;	// Consider renaming to body, description, or context.
+
+
+//	rulestruct[counters->rulecount].ruleset_id = ruleset_track_id;
+	ParseRuleHead(rulebuf, begin);	// Using begin as length should drop rule body.
+	ParseRuleBody(rulebuf, begin, end);	// This will not process content after last ')'. Assuming desirable.
+}
+
+void UNesting( const char *ruleset, FILE *tmp ) {
+    FILE *rulesfile;
+    FILE *tempfile = tmp;
+    char ruleset_fullname[MAXPATH];
+    char rulebuf[RULEBUF] = { 0 };
+    char test[RULEBUF] = { 0 };
+    char LastLine[RULEBUF] = { 0 };
+    int nest=0;
+    int i=0;
+    /* For testing purposes. */
+    int FileLineCount=0;
+    int RuleLineCount=0;
+    int RulesCollected=0;
+
+    if (tempfile == NULL) Sagan_Log(ERROR, "[%s, line %d] Tempfile does not exist: %s ", tempfile);
+
+    strlcpy(ruleset_fullname, ruleset, sizeof(ruleset_fullname));	// Not sure if/why this is necessary.
+    if (( rulesfile = fopen(ruleset_fullname, "r" )) == NULL ) {
+        Sagan_Log(ERROR, "[%s, line %d] Cannot open rule file ( \"%s\" - %s)", __FILE__, __LINE__, ruleset_fullname, strerror(errno));
+    }
+
+    while ( fgets(rulebuf, sizeof(rulebuf), rulesfile) != NULL ) {
+        FileLineCount++;
+	//Sagan_Log(NORMAL, "FileLineCount = %d ", FileLineCount);
+        if ( rulebuf[0] == '#' || rulebuf[0] == 10 ) continue;	// Would be nice to skip white-space.
+        RuleLineCount++;
+	//Sagan_Log(NORMAL, "RuleLineCount = %d ", RuleLineCount);
+
+        Remove_Return(rulebuf);
+
+        for (i=0; i<strlen(rulebuf); i++) {	// Rule is done. This probably fails if rule ends on same line as another rule starts.
+            if ( rulebuf[i] == '(' ) nest++;
+            else if ( rulebuf[i] == ')' ) nest--;
+		//Sagan_Log(NORMAL, "processing %c (nest = %d)", rulebuf[i], nest);
+
+            if ( nest == 0 && rulebuf[i] == ';' ) {
+                RulesCollected++;
+		//Sagan_Log(NORMAL, "RulesCollected = %d ", RulesCollected);
+                RuleLineCount = 0;
+                strlcat(LastLine, rulebuf, sizeof(LastLine));
+                //ParseRule(LastLine, sizeof(LastLine));	// Send rule to processing.
+                //Sagan_Log(NORMAL, "UNested: %s ", LastLine);
+                fputs(LastLine, tempfile);
+                memset(LastLine, 0, sizeof(LastLine));	// Reset.
+                continue;
+            }
+        }
+        /* Rule did not terminate on line-- read next. */
+        strlcat(LastLine, rulebuf, sizeof(LastLine));
+    }
+
+    rewind(tempfile);
+    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile is/has null (%s).", tempfile);
+    rewind(tempfile);
+}
+
 void Load_Rules( const char *ruleset )
 {
 
@@ -103,6 +226,7 @@ void Load_Rules( const char *ruleset )
     int erroffset;
 
     FILE *rulesfile;
+    FILE *tempfile = tmpfile();
     char ruleset_fullname[MAXPATH];
 
     char *rulestring;
@@ -196,13 +320,16 @@ void Load_Rules( const char *ruleset )
 
     int ruleset_track_id = 0;
 
+    int *tmp_pos_test;
+
+
     /* Store rule set names/path in memory for later usage dynamic loading, etc */
 
     strlcpy(ruleset_fullname, ruleset, sizeof(ruleset_fullname));
 
     if (( rulesfile = fopen(ruleset_fullname, "r" )) == NULL )
         {
-            Sagan_Log(ERROR, "[%s, line %d] Cannot open rule file (%s - %s)", __FILE__, __LINE__, ruleset_fullname, strerror(errno));
+            Sagan_Log(ERROR, "[%s, line %d] Cannot open rule file ( \"%s\" - %s)", __FILE__, __LINE__, ruleset_fullname, strerror(errno));
         }
 
 
@@ -223,7 +350,9 @@ void Load_Rules( const char *ruleset )
 
     Sagan_Log(NORMAL, "Loading %s rule file.", ruleset_fullname);
 
-    while ( fgets(rulebuf, sizeof(rulebuf), rulesfile) != NULL )
+    UNesting(ruleset, tempfile);	// Testing.
+
+    while ( fgets(rulebuf, sizeof(rulebuf), tempfile) != NULL )
         {
             /* Reset for next rule */
 
@@ -251,7 +380,7 @@ void Load_Rules( const char *ruleset )
 
             linecount++;
 
-            if (rulebuf[0] == '#' || rulebuf[0] == 10 || rulebuf[0] == ';' || rulebuf[0] == 32)
+            if (rulebuf[0] == '#' || rulebuf[0] == 10 || rulebuf[0] == ';' || rulebuf[0] == 32)	// Does this allow for leading white-space?
                 {
 
                     continue;
@@ -354,9 +483,9 @@ void Load_Rules( const char *ruleset )
                     rc++;
                 }
 
-		if (!Sagan_strstr(rulebuf, "alert unknown ") && !Sagan_strstr(rulebuf, "drop unknown ")) {
-			rc++;
-		}
+            if (!Sagan_strstr(rulebuf, "alert unknown ") && !Sagan_strstr(rulebuf, "drop unknown ")) {
+                rc++;
+            }
 
             if ( rc >= 7 )
                 {

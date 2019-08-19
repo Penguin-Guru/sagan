@@ -466,6 +466,8 @@ void Load_YAML_Config( char *yaml_file )
                                                             if (tmpbuf[0] == 10 ) continue;
                                                             if (tmpbuf[0] == 32 ) continue;
 
+							    /* Allow for comments on non-first character? Might already be done. */
+
                                                             /* Simple check to see if this is the first entry or not.  This is to keep our
                                                                "," on mark */
 
