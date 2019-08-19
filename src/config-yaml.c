@@ -647,6 +647,12 @@ void Load_YAML_Config( char *yaml_file )
 					*/
                                         }
 
+                                    if (!strcmp(last_pass, "multi-line-rules")) {
+                                        if (value) config->multiline_rules = true;
+                                        else config->multiline_rules = false;	// Default to old behaviour.
+                                        //strlcpy(config->multiline_rules, value, sizeof(config->multiline_rules));
+                                    }
+
 
 #ifndef HAVE_LIBFASTJSON
 

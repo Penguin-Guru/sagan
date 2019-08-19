@@ -99,6 +99,7 @@ struct _SaganConfig
     bool         sagan_is_file;                       /* FIFO or FILE */
     char         sagan_log_path[MAXPATH];
     char         sagan_rule_path[MAXPATH];
+    bool         multiline_rules;	// True enables, causing pre-processing with temporary file.
     bool         change_localhosts;	// True disables replacement of localhost addresses.
     char         default_address[MAXHOST];	// Used as place-holder for logs not including source and/or destination.
     char         sagan_host[MAXHOST];

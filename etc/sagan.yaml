@@ -130,7 +130,8 @@ sagan-core:
     default-port: 0
     default-proto: unknown
     dns-warnings: enabled
-    source-lookup: disabled		
+    source-lookup: disabled
+    multi-line-rules: false
     fifo-size: 1048576		# System must support F_GETPIPE_SZ/F_SETPIPE_SZ. 
     max-threads: 100
     classification: "$CONF_PATH/classification.config"

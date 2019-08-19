@@ -320,8 +320,6 @@ void Load_Rules( const char *ruleset )
 
     int ruleset_track_id = 0;
 
-    int *tmp_pos_test;
-
 
     /* Store rule set names/path in memory for later usage dynamic loading, etc */
 
@@ -350,7 +348,8 @@ void Load_Rules( const char *ruleset )
 
     Sagan_Log(NORMAL, "Loading %s rule file.", ruleset_fullname);
 
-    UNesting(ruleset, tempfile);	// Testing.
+    if (config->multiline_rules == true) UNesting(ruleset, tempfile);
+    else tempfile = rulesfile;
 
     while ( fgets(rulebuf, sizeof(rulebuf), tempfile) != NULL )
         {
