@@ -211,7 +211,7 @@ void UNesting( const char *ruleset, FILE *tmp ) {
     }
 
     rewind(tempfile);
-    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile (%s) has null. Rules punctuated by semicolons?", __FILE__, __LINE__, tempfile);
+    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(WARN, "[%s, line %d] Tempfile (%s) has null. Is file empty? Rules must be punctuated by semicolons with multi-line-rules enabled.", __FILE__, __LINE__, tempfile);
     rewind(tempfile);
 }
 
@@ -2035,7 +2035,7 @@ void Load_Rules( const char *ruleset )
                             if ( meta_content_count > MAX_META_CONTENT )
                                 {
                                     bad_rule = true;
-                                    Sagan_Log(WARN, "[%s, line %d] There is to many \"meta_content\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
+                                    Sagan_Log(WARN, "[%s, line %d] There are too many \"meta_content\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
                                     continue;
                                 }
 
@@ -2383,7 +2383,7 @@ void Load_Rules( const char *ruleset )
                             if ( content_count > MAX_CONTENT )
                                 {
                                     bad_rule = true;
-                                    Sagan_Log(WARN, "[%s, line %d] There is to many \"content\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
+                                    Sagan_Log(WARN, "[%s, line %d] There are too many \"content\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
                                     continue;
                                 }
 
@@ -2551,7 +2551,7 @@ void Load_Rules( const char *ruleset )
                             if ( pcre_count > MAX_PCRE )
                                 {
                                     bad_rule = true;
-                                    Sagan_Log(WARN, "[%s, line %d] There is to many \"pcre\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
+                                    Sagan_Log(WARN, "[%s, line %d] There are too many \"pcre\" types in the rule at line %d in %s, skipping rule", __FILE__, __LINE__, linecount, ruleset_fullname);
                                     continue;
                                 }
 
