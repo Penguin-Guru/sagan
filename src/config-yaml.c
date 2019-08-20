@@ -626,11 +626,8 @@ void Load_YAML_Config( char *yaml_file )
                                     }
 
                                     if (!strcmp(last_pass, "change-localhosts")) {
-                                        if ( value ) {
-                                          config->change_localhosts = true;
-                                        } else {
-                                            config->change_localhosts = false;
-                                        }
+				        if (!strcasecmp(value, "enabled") || !strcasecmp(value, "true" ) || !strcasecmp(value, "yes") ) config->change_localhosts = true;
+                                        else config->change_localhosts = false;
                                     }
 
                                     else if (!strcmp(last_pass, "default-port"))
@@ -648,9 +645,8 @@ void Load_YAML_Config( char *yaml_file )
                                         }
 
                                     if (!strcmp(last_pass, "multi-line-rules")) {
-                                        if (value) config->multiline_rules = true;
+				        if (!strcasecmp(value, "enabled") || !strcasecmp(value, "true" ) || !strcasecmp(value, "yes") ) config->multiline_rules = true;
                                         else config->multiline_rules = false;	// Default to old behaviour.
-                                        //strlcpy(config->multiline_rules, value, sizeof(config->multiline_rules));
                                     }
 
 

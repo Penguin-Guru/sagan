@@ -168,9 +168,9 @@ void UNesting( const char *ruleset, FILE *tmp ) {
     int nest=0;
     int i=0;
     /* For testing purposes. */
-    int FileLineCount=0;
-    int RuleLineCount=0;
-    int RulesCollected=0;
+    //int FileLineCount=0;
+    //int RuleLineCount=0;
+    //int RulesCollected=0;
 
     if (tempfile == NULL) Sagan_Log(ERROR, "[%s, line %d] Tempfile does not exist: %s ", tempfile);
 
@@ -180,10 +180,11 @@ void UNesting( const char *ruleset, FILE *tmp ) {
     }
 
     while ( fgets(rulebuf, sizeof(rulebuf), rulesfile) != NULL ) {
-        FileLineCount++;
+        //FileLineCount++;
 	//Sagan_Log(NORMAL, "FileLineCount = %d ", FileLineCount);
-        if ( rulebuf[0] == '#' || rulebuf[0] == 10 ) continue;	// Would be nice to skip white-space.
-        RuleLineCount++;
+        //if ( rulebuf[0] == '#' || rulebuf[0] == 10 ) continue;	// Would be nice to skip white-space.
+        if ( rulebuf[0] == '#' || rulebuf[0] == '\n' ) continue;	// Would be nice to skip white-space.
+        //RuleLineCount++;
 	//Sagan_Log(NORMAL, "RuleLineCount = %d ", RuleLineCount);
 
         Remove_Return(rulebuf);
@@ -194,9 +195,9 @@ void UNesting( const char *ruleset, FILE *tmp ) {
 		//Sagan_Log(NORMAL, "processing %c (nest = %d)", rulebuf[i], nest);
 
             if ( nest == 0 && rulebuf[i] == ';' ) {
-                RulesCollected++;
+                //RulesCollected++;
 		//Sagan_Log(NORMAL, "RulesCollected = %d ", RulesCollected);
-                RuleLineCount = 0;
+                //RuleLineCount = 0;
                 strlcat(LastLine, rulebuf, sizeof(LastLine));
                 //ParseRule(LastLine, sizeof(LastLine));	// Send rule to processing.
                 //Sagan_Log(NORMAL, "UNested: %s ", LastLine);
@@ -210,7 +211,7 @@ void UNesting( const char *ruleset, FILE *tmp ) {
     }
 
     rewind(tempfile);
-    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile is/has null (%s).", tempfile);
+    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile (%s) is null.", __FILE__, __LINE__, tempfile);
     rewind(tempfile);
 }
 
