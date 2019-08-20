@@ -211,7 +211,7 @@ void UNesting( const char *ruleset, FILE *tmp ) {
     }
 
     rewind(tempfile);
-    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile (%s) is null.", __FILE__, __LINE__, tempfile);
+    if ( fgets(rulebuf, sizeof(rulebuf), tempfile) == NULL ) Sagan_Log(ERROR, "[%s, line %d] Tempfile (%s) has null. Rules punctuated by semicolons?", __FILE__, __LINE__, tempfile);
     rewind(tempfile);
 }
 
