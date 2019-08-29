@@ -44,7 +44,7 @@
 #include "parsers/parsers.h"
 
 struct _SaganCounters *counters;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganDebug *debug;
 struct _SaganConfig *config;
 
@@ -77,14 +77,14 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
     Flexbit_Cleanup_MMAP();
 
-    for (i = 0; i < rulestruct[rule_position].flexbit_count; i++)
+    for (i = 0; i < RuleBody[rule_position].Flexbit.flexbit_count; i++)
         {
 
             /*******************
              *      ISSET      *
              *******************/
 
-            if ( rulestruct[rule_position].flexbit_type[i] == 3 )
+            if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 3 )
                 {
 
 
@@ -97,13 +97,13 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
                     for (a = 0; a < counters_ipc->flexbit_count; a++)
                         {
 
-                            if ( !memcmp(rulestruct[rule_position].flexbit_name[i], flexbit_ipc[a].flexbit_name, sizeof(rulestruct[rule_position].flexbit_name[i])) &&
+                            if ( !memcmp(RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[a].flexbit_name, sizeof(RuleBody[rule_position].Flexbit.flexbit_name[i])) &&
                                     flexbit_ipc[a].flexbit_state == true )
                                 {
 
                                     /* direction: by_src - most common check */
 
-                                    if ( rulestruct[rule_position].flexbit_direction[i] == 2 &&
+                                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 2 &&
                                             !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) )
 
                                         {
@@ -119,7 +119,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: none */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 0 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 0 )
 
                                         {
 
@@ -134,7 +134,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: both */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 1 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 1 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
 
@@ -151,7 +151,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_dst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 3 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 3 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
 
                                         {
@@ -167,7 +167,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: reverse */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 4 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 4 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) )
 
@@ -183,7 +183,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: src_xbitdst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 5 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 5 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) )
 
                                         {
@@ -199,7 +199,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: dst_xbitsrc */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 6 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 6 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) )
 
                                         {
@@ -215,7 +215,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: both_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 7 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 7 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].src_port == src_port &&
@@ -234,7 +234,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_src_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 8 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 8 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               flexbit_ipc[a].src_port == src_port )
 
@@ -251,7 +251,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_dst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 9 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 9 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst))  &&
                                               flexbit_ipc[a].dst_port == dst_port )
 
@@ -268,7 +268,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: reverse_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 10 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 10 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].src_port == dst_port &&
@@ -287,7 +287,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: src_xbitdst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 11 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 11 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].dst_port == src_port )
 
@@ -304,7 +304,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: dst_xbitsrc_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 12 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 12 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
                                               flexbit_ipc[a].src_port == dst_port )
 
@@ -329,7 +329,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
             *    ISNOTSET     *
             *******************/
 
-            if ( rulestruct[rule_position].flexbit_type[i] == 4 )
+            if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 4 )
                 {
 
 
@@ -342,12 +342,12 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                     for (a = 0; a < counters_ipc->flexbit_count; a++)
                         {
-                            if ( !memcmp(rulestruct[rule_position].flexbit_name[i], flexbit_ipc[a].flexbit_name, sizeof(rulestruct[rule_position].flexbit_name[i])) )
+                            if ( !memcmp(RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[a].flexbit_name, sizeof(RuleBody[rule_position].Flexbit.flexbit_name[i])) )
                                 {
 
                                     /* direction: none */
 
-                                    if ( rulestruct[rule_position].flexbit_direction[i] == 0 )
+                                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 0 )
                                         {
 
                                             if ( flexbit_ipc[a].flexbit_state == true )
@@ -364,7 +364,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: both */
 
-                                    if ( rulestruct[rule_position].flexbit_direction[i] == 1 )
+                                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 1 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
@@ -385,7 +385,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_src */
 
-                                    if ( rulestruct[rule_position].flexbit_direction[i] == 2 )
+                                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 2 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) )
@@ -405,7 +405,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_dst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 3 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 3 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
@@ -425,7 +425,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: reverse */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 4 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 4 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
@@ -446,7 +446,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direciton: src_xbitdst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 5 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 5 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) )
@@ -466,7 +466,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: dst_xbitsrc */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 6 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 6 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) )
@@ -486,7 +486,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: both_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 7 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 7 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
@@ -510,7 +510,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_src_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 8 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 8 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
@@ -532,7 +532,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: by_dst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 9 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 9 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
@@ -554,7 +554,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: reverse_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 10 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 10 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
@@ -577,7 +577,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: src_xbitdst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 11 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 11 )
                                         {
 
                                             if ( !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
@@ -599,7 +599,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
                                     /* direction: dst_xbitsrc_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 12 )
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 12 )
                                         {
 
 
@@ -619,7 +619,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
                                                 }
                                         }
 
-                                } /* if memcmp(rulestruct[rule_position].xbit_name[i] */
+                                } /* if memcmp(RuleBody[rule_position].xbit_name[i] */
                         } /* for a = 0 */
 
                     /* flexbit wasn't found for isnotset */
@@ -629,17 +629,17 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
                             flexbit_total_match++;
                         }
 
-                } /* rulestruct[rule_position].flexbit_type[i] == 4 */
+                } /* RuleBody[rule_position].Flexbit.flexbit_type[i] == 4 */
 
-        } /* for (i = 0; i < rulestruct[rule_position].xbit_count; i++) */
+        } /* for (i = 0; i < RuleBody[rule_position].xbit_count; i++) */
 
 
-    if ( flexbit_total_match == rulestruct[rule_position].flexbit_condition_count )
+    if ( flexbit_total_match == RuleBody[rule_position].Flexbit.flexbit_condition_count )
         {
 
             if ( debug->debugflexbit )
                 {
-                    Sagan_Log(DEBUG, "[%s, line %d] Got %d flexbits & needed %d. Got corrent number of flexbits, return true!", __FILE__, __LINE__, flexbit_total_match, rulestruct[rule_position].flexbit_condition_count );
+                    Sagan_Log(DEBUG, "[%s, line %d] Got %d flexbits & needed %d. Got corrent number of flexbits, return true!", __FILE__, __LINE__, flexbit_total_match, RuleBody[rule_position].Flexbit.flexbit_condition_count );
                 }
 
             return(true);
@@ -650,7 +650,7 @@ bool Flexbit_Condition_MMAP(int rule_position, char *ip_src, char *ip_dst, int s
 
             if ( debug->debugflexbit )
                 {
-                    Sagan_Log(DEBUG, "[%s, line %d] Got %d flexbits, needed %d", __FILE__, __LINE__, flexbit_total_match, rulestruct[rule_position].flexbit_condition_count );
+                    Sagan_Log(DEBUG, "[%s, line %d] Got %d flexbits, needed %d", __FILE__, __LINE__, flexbit_total_match, RuleBody[rule_position].Flexbit.flexbit_condition_count );
                 }
 
             return(false);
@@ -675,22 +675,22 @@ bool Flexbit_Count_MMAP( int rule_position, char *ip_src, char *ip_dst )
     uint32_t i = 0;
     uint32_t counter = 0;
 
-    for (i = 0; i < rulestruct[rule_position].flexbit_count_count; i++)
+    for (i = 0; i < RuleBody[rule_position].Flexbit.flexbit_count_count; i++)
         {
 
             for (a = 0; a < counters_ipc->flexbit_count; a++)
                 {
 
-                    if ( rulestruct[rule_position].flexbit_direction[i] == 2 &&
+                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 2 &&
                             !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) )
                         {
 
                             counter++;
 
-                            if ( rulestruct[rule_position].flexbit_count_gt_lt[i] == 0 )
+                            if ( RuleBody[rule_position].Flexbit.flexbit_count_gt_lt[i] == 0 )
                                 {
 
-                                    if ( counter > rulestruct[rule_position].flexbit_count_counter[i] )
+                                    if ( counter > RuleBody[rule_position].Flexbit.flexbit_count_counter[i] )
                                         {
 
                                             if ( debug->debugflexbit)
@@ -704,16 +704,16 @@ bool Flexbit_Count_MMAP( int rule_position, char *ip_src, char *ip_dst )
                                 }
                         }
 
-                    else if ( rulestruct[rule_position].flexbit_direction[i] == 3 &&
+                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 3 &&
                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
                         {
 
                             counter++;
 
-                            if ( rulestruct[rule_position].flexbit_count_gt_lt[i] == 0 )
+                            if ( RuleBody[rule_position].Flexbit.flexbit_count_gt_lt[i] == 0 )
                                 {
 
-                                    if ( counter > rulestruct[rule_position].flexbit_count_counter[i] )
+                                    if ( counter > RuleBody[rule_position].Flexbit.flexbit_count_counter[i] )
                                         {
 
                                             if ( debug->debugflexbit)
@@ -774,25 +774,25 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
     Flexbit_Cleanup_MMAP();
 
-    for (i = 0; i < rulestruct[rule_position].flexbit_count; i++)
+    for (i = 0; i < RuleBody[rule_position].Flexbit.flexbit_count; i++)
         {
 
             /*******************
              *      UNSET      *
              *******************/
 
-            if ( rulestruct[rule_position].flexbit_type[i] == 2 )
+            if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 2 )
                 {
 
                     for (a = 0; a < counters_ipc->flexbit_count; a++)
                         {
 
-                            if ( !strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i] ))
+                            if ( !strcmp(flexbit_ipc[a].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i] ))
                                 {
 
                                     /* direction: none */
 
-                                    if ( rulestruct[rule_position].flexbit_direction[i] == 0 )
+                                    if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 0 )
                                         {
 
                                             if ( debug->debugflexbit)
@@ -816,7 +816,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: both */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 1 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 1 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
                                         {
@@ -840,7 +840,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: by_src */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 2 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 2 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) )
 
                                         {
@@ -865,7 +865,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: by_dst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 3 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 3 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) )
                                         {
 
@@ -888,7 +888,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: reverse */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 4 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 4 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) )
 
@@ -913,7 +913,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: src_xbitdst */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 5 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 5 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) )
                                         {
 
@@ -936,7 +936,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: dst_xbitsrc */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 6 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 6 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) )
                                         {
 
@@ -959,7 +959,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: both_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 7 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 7 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].src_port == src_port &&
@@ -985,7 +985,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: by_src_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 8 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 8 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                               flexbit_ipc[a].src_port == src_port )
 
@@ -1011,7 +1011,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: by_dst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 9 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 9 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].dst_port == dst_port )
                                         {
@@ -1035,7 +1035,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: reverse_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 10 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 10 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
                                               flexbit_ipc[a].src_port == dst_port &&
@@ -1062,7 +1062,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: src_xbitdst_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 11 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 11 &&
                                               !memcmp(flexbit_ipc[a].ip_dst, ip_src, sizeof(flexbit_ipc[a].ip_dst)) &&
                                               flexbit_ipc[a].dst_port == src_port )
                                         {
@@ -1086,7 +1086,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                                     /* direction: dst_xbitsrc_p */
 
-                                    else if ( rulestruct[rule_position].flexbit_direction[i] == 12 &&
+                                    else if ( RuleBody[rule_position].Flexbit.flexbit_direction[i] == 12 &&
                                               !memcmp(flexbit_ipc[a].ip_src, ip_dst, sizeof(flexbit_ipc[a].ip_src)) &&
                                               flexbit_ipc[a].src_port == dst_port )
                                         {
@@ -1113,16 +1113,16 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                     if ( debug->debugflexbit && flexbit_unset_match == 0 )
                         {
-                            Sagan_Log(DEBUG, "[%s, line %d] No flexbit found to \"unset\" for %s.", __FILE__, __LINE__, rulestruct[rule_position].flexbit_name[i]);
+                            Sagan_Log(DEBUG, "[%s, line %d] No flexbit found to \"unset\" for %s.", __FILE__, __LINE__, RuleBody[rule_position].Flexbit.flexbit_name[i]);
                         }
 
-                } /* if ( rulestruct[rule_position].flexbit_type[i] == 2 ) */
+                } /* if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 2 ) */
 
             /*******************
              *      SET        *
             *******************/
 
-            else if ( rulestruct[rule_position].flexbit_type[i] == 1 )
+            else if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 1 )
                 {
 
                     for (a = 0; a < counters_ipc->flexbit_count; a++)
@@ -1130,7 +1130,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             /* Do we have the flexbit already in memory?  If so,  update the information */
 
-                            if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
+                            if (!strcmp(flexbit_ipc[a].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                     flexbit_ipc[a].src_port == config->default_port &&
@@ -1142,17 +1142,17 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                                     pthread_mutex_lock(&Flexbit_Mutex);
 
                                     flexbit_ipc[a].flexbit_date = atol(timet);
-                                    flexbit_ipc[a].flexbit_expire = atol(timet) + rulestruct[rule_position].flexbit_timeout[i];
+                                    flexbit_ipc[a].flexbit_expire = atol(timet) + RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                                     flexbit_ipc[a].flexbit_state = true;
                                     strlcpy(flexbit_ipc[a].syslog_message, syslog_message, sizeof(flexbit_ipc[a].syslog_message));
-                                    strlcpy(flexbit_ipc[a].signature_msg, rulestruct[rule_position].s_msg, sizeof(flexbit_ipc[a].signature_msg));
-                                    flexbit_ipc[a].sid = rulestruct[rule_position].s_sid;
+                                    strlcpy(flexbit_ipc[a].signature_msg, RuleBody[rule_position].s_msg, sizeof(flexbit_ipc[a].signature_msg));
+                                    flexbit_ipc[a].sid = RuleBody[rule_position].s_sid;
 
 
                                     if ( debug->debugflexbit)
                                         {
 
-                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, rulestruct[rule_position].flexbit_name[i], flexbit_ipc[i].flexbit_expire, rulestruct[rule_position].flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
+                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[i].flexbit_expire, RuleBody[rule_position].Flexbit.flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
 
                                         }
 
@@ -1179,12 +1179,12 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             memset(&flexbit_track[flexbit_track_count], 0, sizeof(_Sagan_Flexbit_Track));
 
-                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, rulestruct[rule_position].flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
+                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
-                            strlcpy(flexbit_ipc[flexbit_track_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(flexbit_ipc[flexbit_track_count].signature_msg));
-                            flexbit_ipc[flexbit_track_count].sid = rulestruct[rule_position].s_sid;
+                            strlcpy(flexbit_ipc[flexbit_track_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(flexbit_ipc[flexbit_track_count].signature_msg));
+                            flexbit_ipc[flexbit_track_count].sid = RuleBody[rule_position].s_sid;
 
-                            flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
+                            flexbit_track[flexbit_track_count].flexbit_timeout = RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                             flexbit_track[flexbit_track_count].flexbit_srcport = config->default_port;
                             flexbit_track[flexbit_track_count].flexbit_dstport = config->default_port;
                             flexbit_track_count++;
@@ -1197,7 +1197,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
              *      SET_SRCPORT        *
             ****************************/
 
-            else if ( rulestruct[rule_position].flexbit_type[i] == 5 )
+            else if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 5 )
                 {
 
                     flexbit_match = false;
@@ -1207,7 +1207,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             /* Do we have the flexbit already in memory?  If so,  update the information */
 
-                            if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
+                            if (!strcmp(flexbit_ipc[a].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                     flexbit_ipc[a].src_port == src_port &&
@@ -1218,14 +1218,14 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                                     pthread_mutex_lock(&Flexbit_Mutex);
 
                                     flexbit_ipc[a].flexbit_date = atol(timet);
-                                    flexbit_ipc[a].flexbit_expire = atol(timet) + rulestruct[rule_position].flexbit_timeout[i];
+                                    flexbit_ipc[a].flexbit_expire = atol(timet) + RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                                     flexbit_ipc[a].flexbit_state = true;
                                     strlcpy(flexbit_ipc[a].syslog_message, syslog_message, sizeof(flexbit_ipc[a].syslog_message));
 
                                     if ( debug->debugflexbit)
                                         {
 
-                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_srcport\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, rulestruct[rule_position].flexbit_name[i], flexbit_ipc[i].flexbit_expire, rulestruct[rule_position].flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
+                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_srcport\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[i].flexbit_expire, RuleBody[rule_position].Flexbit.flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
 
                                         }
 
@@ -1252,9 +1252,9 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             memset(&flexbit_track[flexbit_track_count], 0, sizeof(_Sagan_Flexbit_Track));
 
-                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, rulestruct[rule_position].flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
+                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
-                            flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
+                            flexbit_track[flexbit_track_count].flexbit_timeout = RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                             flexbit_track[flexbit_track_count].flexbit_srcport = src_port;
                             flexbit_track[flexbit_track_count].flexbit_dstport = config->default_port;
                             flexbit_track_count++;
@@ -1267,7 +1267,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
              *      SET_DSTPORT        *
             ****************************/
 
-            else if ( rulestruct[rule_position].flexbit_type[i] == 6 )
+            else if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 6 )
                 {
 
                     flexbit_match = false;
@@ -1277,7 +1277,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             /* Do we have the flexbit already in memory?  If so,  update the information */
 
-                            if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
+                            if (!strcmp(flexbit_ipc[a].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                     flexbit_ipc[a].src_port == config->default_port &&
@@ -1288,14 +1288,14 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                                     pthread_mutex_lock(&Flexbit_Mutex);
 
                                     flexbit_ipc[a].flexbit_date = atol(timet);
-                                    flexbit_ipc[a].flexbit_expire = atol(timet) + rulestruct[rule_position].flexbit_timeout[i];
+                                    flexbit_ipc[a].flexbit_expire = atol(timet) + RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                                     flexbit_ipc[a].flexbit_state = true;
                                     strlcpy(flexbit_ipc[a].syslog_message, syslog_message, sizeof(flexbit_ipc[a].syslog_message));
 
                                     if ( debug->debugflexbit)
                                         {
 
-                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_dstport\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, rulestruct[rule_position].flexbit_name[i], flexbit_ipc[i].flexbit_expire, rulestruct[rule_position].flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
+                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_dstport\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[i].flexbit_expire, RuleBody[rule_position].Flexbit.flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
 
                                         }
 
@@ -1322,9 +1322,9 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             memset(&flexbit_track[flexbit_track_count], 0, sizeof(_Sagan_Flexbit_Track));
 
-                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, rulestruct[rule_position].flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
+                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
-                            flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
+                            flexbit_track[flexbit_track_count].flexbit_timeout = RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                             flexbit_track[flexbit_track_count].flexbit_srcport = config->default_port;
                             flexbit_track[flexbit_track_count].flexbit_dstport = dst_port;
                             flexbit_track_count++;
@@ -1337,7 +1337,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
              *      SET_PORTS        *
             **************************/
 
-            else if ( rulestruct[rule_position].flexbit_type[i] == 7 )
+            else if ( RuleBody[rule_position].Flexbit.flexbit_type[i] == 7 )
                 {
 
                     flexbit_match = false;
@@ -1347,7 +1347,7 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             /* Do we have the flexbit already in memory?  If so,  update the information */
 
-                            if (!strcmp(flexbit_ipc[a].flexbit_name, rulestruct[rule_position].flexbit_name[i]) &&
+                            if (!strcmp(flexbit_ipc[a].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i]) &&
                                     !memcmp(flexbit_ipc[a].ip_src, ip_src, sizeof(flexbit_ipc[a].ip_src)) &&
                                     !memcmp(flexbit_ipc[a].ip_dst, ip_dst, sizeof(flexbit_ipc[a].ip_dst)) &&
                                     flexbit_ipc[a].src_port == src_port &&
@@ -1358,14 +1358,14 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                                     pthread_mutex_lock(&Flexbit_Mutex);
 
                                     flexbit_ipc[a].flexbit_date = atol(timet);
-                                    flexbit_ipc[a].flexbit_expire = atol(timet) + rulestruct[rule_position].flexbit_timeout[i];
+                                    flexbit_ipc[a].flexbit_expire = atol(timet) + RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                                     flexbit_ipc[a].flexbit_state = true;
                                     strlcpy(flexbit_ipc[a].syslog_message, syslog_message, sizeof(flexbit_ipc[a].syslog_message));
 
                                     if ( debug->debugflexbit)
                                         {
 
-                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_ports\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, rulestruct[rule_position].flexbit_name[i], flexbit_ipc[i].flexbit_expire, rulestruct[rule_position].flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
+                                            Sagan_Log(DEBUG,"[%s, line %d] [%d] Updated via \"set_ports\" for flexbit \"%s\". Nex expire time is %d (%d) [ %s:%d -> %s:%d ]", __FILE__, __LINE__, a, RuleBody[rule_position].Flexbit.flexbit_name[i], flexbit_ipc[i].flexbit_expire, RuleBody[rule_position].Flexbit.flexbit_timeout[i], flexbit_ipc[a].ip_src, flexbit_ipc[a].src_port, flexbit_ipc[a].ip_dst, flexbit_ipc[a].dst_port);
 
                                         }
 
@@ -1392,12 +1392,12 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
 
                             memset(&flexbit_track[flexbit_track_count], 0, sizeof(_Sagan_Flexbit_Track));
 
-                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, rulestruct[rule_position].flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
+                            strlcpy(flexbit_track[flexbit_track_count].flexbit_name, RuleBody[rule_position].Flexbit.flexbit_name[i], sizeof(flexbit_track[flexbit_track_count].flexbit_name));
                             strlcpy(flexbit_ipc[flexbit_track_count].syslog_message, syslog_message, sizeof(flexbit_ipc[flexbit_track_count].syslog_message));
-                            strlcpy(flexbit_ipc[flexbit_track_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(flexbit_ipc[flexbit_track_count].signature_msg));
-                            flexbit_ipc[flexbit_track_count].sid = rulestruct[rule_position].s_sid;
+                            strlcpy(flexbit_ipc[flexbit_track_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(flexbit_ipc[flexbit_track_count].signature_msg));
+                            flexbit_ipc[flexbit_track_count].sid = RuleBody[rule_position].s_sid;
 
-                            flexbit_track[flexbit_track_count].flexbit_timeout = rulestruct[rule_position].flexbit_timeout[i];
+                            flexbit_track[flexbit_track_count].flexbit_timeout = RuleBody[rule_position].Flexbit.flexbit_timeout[i];
                             flexbit_track[flexbit_track_count].flexbit_srcport = src_port;
                             flexbit_track[flexbit_track_count].flexbit_dstport = dst_port;
                             flexbit_track_count++;
@@ -1433,9 +1433,9 @@ void Flexbit_Set_MMAP(int rule_position, char *ip_src, char *ip_dst, int src_por
                             flexbit_ipc[counters_ipc->flexbit_count].expire = flexbit_track[i].flexbit_timeout;
 
                             strlcpy(flexbit_ipc[counters_ipc->flexbit_count].flexbit_name, flexbit_track[i].flexbit_name, sizeof(flexbit_ipc[counters_ipc->flexbit_count].flexbit_name));
-                            strlcpy(flexbit_ipc[counters_ipc->flexbit_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(flexbit_ipc[counters_ipc->flexbit_count].signature_msg));
+                            strlcpy(flexbit_ipc[counters_ipc->flexbit_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(flexbit_ipc[counters_ipc->flexbit_count].signature_msg));
                             strlcpy(flexbit_ipc[counters_ipc->flexbit_count].syslog_message, syslog_message, sizeof(flexbit_ipc[counters_ipc->flexbit_count].syslog_message));
-                            flexbit_ipc[counters_ipc->flexbit_count].sid = rulestruct[rule_position].s_sid;
+                            flexbit_ipc[counters_ipc->flexbit_count].sid = RuleBody[rule_position].s_sid;
 
 
                             if ( debug->debugflexbit)

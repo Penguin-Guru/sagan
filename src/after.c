@@ -42,7 +42,7 @@ pthread_mutex_t After2_Mutex=PTHREAD_MUTEX_INITIALIZER;
 struct _After2_IPC *After2_IPC;
 
 struct _SaganCounters *counters;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganDebug *debug;
 struct _SaganConfig *config;
 
@@ -80,27 +80,27 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
     current_time = atol(timet);
     username_tmp[0] = '\0';
 
-    if ( rulestruct[rule_position].after2_method_src == true )
+    if ( RuleBody[rule_position].After.after2_method_src == true )
         {
             strlcpy(src_tmp, ip_src, sizeof(src_tmp));
         }
 
-    if ( rulestruct[rule_position].after2_method_dst == true )
+    if ( RuleBody[rule_position].After.after2_method_dst == true )
         {
             strlcpy(dst_tmp, ip_dst, sizeof(dst_tmp));
         }
 
-    if ( rulestruct[rule_position].after2_method_username == true && username != NULL )
+    if ( RuleBody[rule_position].After.after2_method_username == true && username != NULL )
         {
             strlcpy(username_tmp, username, sizeof(username_tmp));
         }
 
-    if ( rulestruct[rule_position].after2_method_srcport == true )
+    if ( RuleBody[rule_position].After.after2_method_srcport == true )
         {
             src_port_tmp = src_port;
         }
 
-    if ( rulestruct[rule_position].after2_method_dstport == true )
+    if ( RuleBody[rule_position].After.after2_method_dstport == true )
         {
             dst_port_tmp = dst_port;
         }
@@ -112,8 +112,8 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
     for (i = 0; i < counters_ipc->after2_count; i++ )
         {
 
-            if ( hash == After2_IPC[i].hash && After2_IPC[i].sid == rulestruct[rule_position].s_sid &&
-                    After2_IPC[i].rev == rulestruct[rule_position].s_rev )
+            if ( hash == After2_IPC[i].hash && After2_IPC[i].sid == RuleBody[rule_position].s_sid &&
+                    After2_IPC[i].rev == RuleBody[rule_position].s_rev )
                 {
 
 
@@ -125,11 +125,11 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
                     after_oldtime = current_time - After2_IPC[i].utime;
 
                     strlcpy(After2_IPC[i].syslog_message, syslog_message, sizeof(After2_IPC[i].syslog_message));
-                    strlcpy(After2_IPC[i].signature_msg, rulestruct[rule_position].s_msg, sizeof(After2_IPC[i].signature_msg));
+                    strlcpy(After2_IPC[i].signature_msg, RuleBody[rule_position].s_msg, sizeof(After2_IPC[i].signature_msg));
 
                     /* Reset counter if it's expired */
 
-                    if ( after_oldtime > rulestruct[rule_position].after2_seconds || After2_IPC[i].count == 0 )
+                    if ( after_oldtime > RuleBody[rule_position].After.after2_seconds || After2_IPC[i].count == 0 )
                         {
                             After2_IPC[i].count=1;
                             After2_IPC[i].utime = current_time;
@@ -137,7 +137,7 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
                         }
 
 
-                    if ( rulestruct[rule_position].after2_count < After2_IPC[i].count )
+                    if ( RuleBody[rule_position].After.after2_count < After2_IPC[i].count )
                         {
 
                             After2_IPC[i].utime = current_time;
@@ -199,14 +199,14 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
 
             After2_IPC[counters_ipc->after2_count].count = 1;
             After2_IPC[counters_ipc->after2_count].utime = current_time;
-            After2_IPC[counters_ipc->after2_count].expire = rulestruct[rule_position].after2_seconds;
-            After2_IPC[counters_ipc->after2_count].sid = rulestruct[rule_position].s_sid;
-            After2_IPC[counters_ipc->after2_count].rev = rulestruct[rule_position].s_rev;
-            After2_IPC[counters_ipc->after2_count].target_count =rulestruct[rule_position].after2_count;
+            After2_IPC[counters_ipc->after2_count].expire = RuleBody[rule_position].After.after2_seconds;
+            After2_IPC[counters_ipc->after2_count].sid = RuleBody[rule_position].s_sid;
+            After2_IPC[counters_ipc->after2_count].rev = RuleBody[rule_position].s_rev;
+            After2_IPC[counters_ipc->after2_count].target_count =RuleBody[rule_position].After.after2_count;
 
-            After2_IPC[counters_ipc->after2_count].after2_method_src = rulestruct[rule_position].after2_method_src;
-            After2_IPC[counters_ipc->after2_count].after2_method_dst = rulestruct[rule_position].after2_method_dst;
-            After2_IPC[counters_ipc->after2_count].after2_method_username = rulestruct[rule_position].after2_method_username;
+            After2_IPC[counters_ipc->after2_count].after2_method_src = RuleBody[rule_position].After.after2_method_src;
+            After2_IPC[counters_ipc->after2_count].after2_method_dst = RuleBody[rule_position].After.after2_method_dst;
+            After2_IPC[counters_ipc->after2_count].after2_method_username = RuleBody[rule_position].After.after2_method_username;
 
             strlcpy(After2_IPC[counters_ipc->after2_count].ip_src, src_tmp, sizeof(After2_IPC[counters_ipc->after2_count].ip_src));
             After2_IPC[counters_ipc->after2_count].src_port = src_port_tmp;
@@ -217,7 +217,7 @@ bool After2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_dst, 
             strlcpy(After2_IPC[counters_ipc->after2_count].username, username_tmp, sizeof(After2_IPC[counters_ipc->after2_count].username));
 
             strlcpy(After2_IPC[counters_ipc->after2_count].syslog_message, syslog_message, sizeof(After2_IPC[counters_ipc->after2_count].syslog_message));
-            strlcpy(After2_IPC[counters_ipc->after2_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(After2_IPC[counters_ipc->after2_count].signature_msg));
+            strlcpy(After2_IPC[counters_ipc->after2_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(After2_IPC[counters_ipc->after2_count].signature_msg));
 
             counters_ipc->after2_count++;
 

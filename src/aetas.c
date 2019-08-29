@@ -43,7 +43,7 @@
 #include "aetas.h"
 #include "rules.h"
 
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 
 int Check_Time(int rule_number)
 {
@@ -90,14 +90,14 @@ int Check_Time(int rule_number)
 
     /* We check if rule extends to a new day */
 
-    if ( rulestruct[rule_number].aetas_start > rulestruct[rule_number].aetas_end )
+    if ( RuleBody[rule_number].AETAS.aetas_start > RuleBody[rule_number].AETAS.aetas_end )
         {
             next_day = 1;
         }
 
     /* We check if current day is not one of our days */
 
-    if ( ! Check_Day(rulestruct[rule_number].alert_days, day_current ) )
+    if ( ! Check_Day(RuleBody[rule_number].AETAS.alert_days, day_current ) )
         {
             off_day = 1;
         }
@@ -105,14 +105,14 @@ int Check_Time(int rule_number)
     /* We check that we are in the current day || that the previous day is
        one of our days and the rule goes over to a new day */
 
-    if ( Check_Day(rulestruct[rule_number].alert_days, day_current ) || ( Check_Day(rulestruct[rule_number].alert_days, day_current - 1) && next_day == 1) )
+    if ( Check_Day(RuleBody[rule_number].AETAS.alert_days, day_current ) || ( Check_Day(RuleBody[rule_number].AETAS.alert_days, day_current - 1) && next_day == 1) )
         {
 
             /* We check if rule is in current day and does not extend to a new day */
 
             if ( next_day == 0 && off_day == 0)
                 {
-                    if ( current_time >= rulestruct[rule_number].aetas_start && current_time <= rulestruct[rule_number].aetas_end )
+                    if ( current_time >= RuleBody[rule_number].AETAS.aetas_start && current_time <= RuleBody[rule_number].AETAS.aetas_end )
                         {
                             return(true);
                         }
@@ -122,7 +122,7 @@ int Check_Time(int rule_number)
 
             if ( next_day == 1 && off_day == 0 )
                 {
-                    if ( current_time >= rulestruct[rule_number].aetas_start || current_time <= rulestruct[rule_number].aetas_end )
+                    if ( current_time >= RuleBody[rule_number].AETAS.aetas_start || current_time <= RuleBody[rule_number].AETAS.aetas_end )
                         {
                             return(true);
                         }
@@ -132,7 +132,7 @@ int Check_Time(int rule_number)
 
             if ( next_day == 1 && off_day == 1 )
                 {
-                    if ( current_time <= rulestruct[rule_number].aetas_end )
+                    if ( current_time <= RuleBody[rule_number].AETAS.aetas_end )
                         {
                             return(true);
                         }

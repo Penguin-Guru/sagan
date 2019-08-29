@@ -36,14 +36,15 @@
 #include "sagan-config.h"
 
 struct _Rule_Struct *rulestruct;
+struct RuleHead *RuleHead;
 
-/********************/ /************************/ /*****************/
-/***** flow_type ****/ /******* flow_var *******/ /*** direction ***/
-/* 0 = not in group */ /**      0 = any       **/ /**   0 = any   **/
-/* 1 = in group     */ /**      1 = var       **/ /**  1 = right  **/
-/* 2 = not match ip */ /************************/ /**   2 = left  **/
-/* 3 = match ip     */ /************************/ /*****************/
-/********************/ /************************/ /*****************/
+/********************/ /***********************/ /*******************/
+/***** flow_type ****/ /*** keyword_address ***/ /***  direction  ***/
+/* 0 = not in group */ /**     0 = no        **/ /**    0 = any    **/
+/* 1 = in group     */ /**     1 = any       **/ /**    1 = right  **/
+/* 2 = not match ip */ /**     2 = unknown   **/ /**    2 = left   **/
+/* 3 = match ip     */ /***********************/ /*******************/
+/********************/ /***********************/ /*******************/
 
 bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_src_port, unsigned char *ip_dst_bits, int normalize_dst_port)
 {
@@ -62,7 +63,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     unsigned char ip_convert[MAXIPBIT] = { 0 };
 
-    if(rulestruct[b].direction == 0 || rulestruct[b].direction == 1)
+    if(RuleHead[b].direction == 0 || RuleHead[b].direction == 1)
         {
             ip_src = src;
             ip_dst = dst;
@@ -128,9 +129,9 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin ip_proto*/
 
-    if(rulestruct[b].ip_proto != 0)
+    if(RuleHead[b].ip_proto != 0)
         {
-            if(ip_proto == rulestruct[b].ip_proto)
+            if(ip_proto == RuleHead[b].ip_proto)
                 {
                     c1=1;
                 }
@@ -147,18 +148,27 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin flow_1*/
 
-    if(rulestruct[b].a_has_address == true)
+    //if(rulestruct[b].a_has_address == true)
+    //if(RuleHead[b].target[0].keyword_address == 0)
+    if(RuleHead[b].target[0].any_address == false)
         {
-            for(i=0; i < rulestruct[b].flow_1_counter; i++)
+		//Sagan_Log(NORMAL, "Flow: processing RuleHead[%d]...", b);
+            //for(i=0; i < rulestruct[b].flow_1_counter; i++)
+            for(i=0; i < RuleHead[b].target[0].address_count; i++)
                 {
+			//Sagan_Log(NORMAL, "\tFlow: processing address %d...", i);
                     w++;
-                    f1 = rulestruct[b].flow_1_type[w];
+                    //f1 = rulestruct[b].flow_1_type[w];
+                    //f1 = RuleHead[b].target[0].address[i].type;
+                    f1 = RuleHead[b].target[0].address[i].keyword;	// THIS WILL NOT WORK! FIX IT LATER.
+			//Sagan_Log(NORMAL, "\t\tFlow: address is type %d...", f1);
 
                     if(f1 == 0)
                         {
                             ne1++;
 
-                            if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
+                            //if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
+                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1))
                                 {
                                     ne1_val++;
                                 }
@@ -168,7 +178,8 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
                         {
                             eq1++;
-                            if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
+                            //if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
+                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1))
                                 {
                                     eq1_val++;
                                 }
@@ -183,7 +194,8 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                             memset(ip_convert, 0, MAXIPBIT);
                             memcpy(ip_convert, ip_src, MAXIPBIT);
 
-                            if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT) )
+                            //if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT) )
+                            if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT) )
                                 {
                                     ne1_val++;
                                 }
@@ -191,15 +203,18 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
                     else if(f1 == 3)
                         {
+				//Sagan_Log(NORMAL, "\t\tFlow: confirmed address type 3...", b);
 
                             eq1++;
 
                             memset(ip_convert, 0, MAXIPBIT);
                             memcpy(ip_convert, ip_src, MAXIPBIT);
 
-                            if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT))
+                            //if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT))
+                            if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT))
                                 {
 
+					//Sagan_Log(NORMAL, "\t\tFlow: bad memory copy?", b);
                                     eq1_val++;
                                 }
                         }
@@ -243,17 +258,18 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin port_1*/
 
-    if(rulestruct[b].port_1_var != 0)
+    //if(rulestruct[b].port_1_var != 0)
+    if(RuleHead[b].target[0].any_port == false)
         {
-            for(i=0; i < rulestruct[b].port_1_counter; i++)
+            for(i=0; i < RuleHead[b].target[0].port_count; i++)
                 {
                     u++;
-                    g1 = rulestruct[b].port_1_type[u];
+                    g1 = RuleHead[b].target[0].port[u].keyword;	// Why 'u'?
 
                     if(g1 == 0)
                         {
                             ne3++;
-                            if(port_src >= rulestruct[b].port_1[i].lo && port_src <= rulestruct[b].port_1[i].hi)
+                            if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high)
                                 {
                                     ne3_val++;
                                 }
@@ -262,7 +278,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g1 == 1)
                         {
                             eq3++;
-                            if(port_src >= rulestruct[b].port_1[i].lo && port_src <= rulestruct[b].port_1[i].hi)
+                            if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high)
                                 {
                                     eq3_val++;
                                 }
@@ -271,7 +287,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g1 == 2)
                         {
                             ne3++;
-                            if(port_src == rulestruct[b].port_1[i].lo)
+                            if(port_src == RuleHead[b].target[0].port[i].low)
                                 {
                                     ne3_val++;
                                 }
@@ -280,7 +296,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g1 == 3)
                         {
                             eq3++;
-                            if(port_src == rulestruct[b].port_1[i].lo)
+                            if(port_src == RuleHead[b].target[0].port[i].low)
                                 {
                                     eq3_val++;
                                 }
@@ -326,20 +342,21 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /* Begin flow_2 */
 
-    if(rulestruct[b].b_has_address == true)
+    if(RuleHead[b].target[1].any_address == false)
         {
 
-            for(i=0; i < rulestruct[b].flow_2_counter; i++)
+            for(i=0; i < RuleHead[b].target[1].address_count; i++)
                 {
                     z++;
-                    f2 = rulestruct[b].flow_2_type[z];
+                    f2 = RuleHead[b].target[1].address[z].keyword;
 
 
                     if(f2 == 0)
                         {
                             ne2++;
 
-                            if(is_inrange(ip_dst, (unsigned char *)&rulestruct[b].flow_2[i].range, 1))
+                            //if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[0].ipbits, 1))
+                            if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1))
                                 {
                                     ne2_val++;
                                 }
@@ -349,7 +366,8 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                         {
                             eq2++;
 
-                            if(is_inrange(ip_dst, (unsigned char *)&rulestruct[b].flow_2[i].range, 1))
+                            //if(is_inrange2(ip_dst, &RuleHead[b].target[1]))
+                            if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1))
                                 {
                                     eq2_val++;
                                 }
@@ -362,7 +380,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                             memset(ip_convert, 0, MAXIPBIT);
                             memcpy(ip_convert, ip_dst, MAXIPBIT);
 
-                            if (!memcmp(ip_convert, rulestruct[b].flow_2[i].range.ipbits, MAXIPBIT ))
+                            if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT ))
                                 {
                                     ne2_val++;
                                 }
@@ -374,7 +392,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                             memset(ip_convert, 0, MAXIPBIT);
                             memcpy(ip_convert, ip_dst, MAXIPBIT);
 
-                            if (!memcmp(ip_convert, rulestruct[b].flow_2[i].range.ipbits, MAXIPBIT ))
+                            if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT ))
                                 {
                                     eq2_val++;
                                 }
@@ -418,17 +436,17 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin port_2*/
 
-    if(rulestruct[b].port_2_var != 0)
+    if(RuleHead[b].target[1].any_port == false)
         {
-            for(i=0; i < rulestruct[b].port_2_counter; i++)
+            for(i=0; i < RuleHead[b].target[1].port_count; i++)
                 {
                     v++;
-                    g2 = rulestruct[b].port_2_type[v];
+                    g2 = RuleHead[b].target[1].port[v].keyword;
 
                     if(g2 == 0)
                         {
                             ne4++;
-                            if(port_dst >= rulestruct[b].port_2[i].lo && port_dst <= rulestruct[b].port_2[i].hi)
+                            if(port_dst >= RuleHead[b].target[1].port[i].low && port_dst <= RuleHead[b].target[1].port[i].high)
                                 {
                                     ne4_val++;
                                 }
@@ -437,7 +455,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g2 == 1)
                         {
                             eq4++;
-                            if(port_dst >= rulestruct[b].port_2[i].lo && port_dst <= rulestruct[b].port_2[i].hi)
+                            if(port_dst >= RuleHead[b].target[1].port[i].low && port_dst <= RuleHead[b].target[1].port[i].high)
                                 {
                                     eq4_val++;
                                 }
@@ -446,7 +464,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g2 == 2)
                         {
                             ne4++;
-                            if(port_dst == rulestruct[b].port_2[i].lo)
+                            if(port_dst == RuleHead[b].target[1].port[i].low)
                                 {
                                     ne4_val++;
                                 }
@@ -455,7 +473,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     if(g2 == 3)
                         {
                             eq4++;
-                            if(port_dst == rulestruct[b].port_2[i].lo)
+                            if(port_dst == RuleHead[b].target[1].port[i].low)
                                 {
                                     eq4_val++;
                                 }

@@ -59,7 +59,7 @@ uint64_t unified_event_id;
 #endif
 
 struct _SaganCounters *counters;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganConfig *config;
 
 bool nonthread_alert_lock = false;
@@ -78,7 +78,7 @@ void Output( _Sagan_Event *Event )
     pthread_mutex_lock(&SaganOutputNonThreadMutex);
     nonthread_alert_lock = true;
 
-    if ( config->alert_flag && rulestruct[Event->found].xbit_noalert == false )
+    if ( config->alert_flag && RuleBody[Event->found].Xbit.xbit_noalert == false )
         {
             Alert_File(Event);
         }
@@ -86,7 +86,7 @@ void Output( _Sagan_Event *Event )
     if ( config->eve_flag && config->eve_alerts )
         {
 
-            if ( rulestruct[Event->found].xbit_noeve == false && rulestruct[Event->found].flexbit_noeve == false )
+            if ( RuleBody[Event->found].Xbit.xbit_noeve == false && RuleBody[Event->found].Flexbit.flexbit_noeve == false )
                 {
                     Alert_JSON(Event);
                 }
@@ -99,7 +99,7 @@ void Output( _Sagan_Event *Event )
 
 #if defined(HAVE_DNET_H) || defined(HAVE_DUMBNET_H)
 
-    if ( config->sagan_unified2_flag && ( rulestruct[Event->found].flexbit_nounified2 == false || rulestruct[Event->found].xbit_nounified2 == false ) )
+    if ( config->sagan_unified2_flag && ( RuleBody[Event->found].Flexbit.flexbit_nounified2 == false || RuleBody[Event->found].Xbit.xbit_nounified2 == false ) )
         {
 
             Unified2( Event );
@@ -167,7 +167,7 @@ void Output( _Sagan_Event *Event )
 
 #ifdef WITH_SNORTSAM
 
-    if ( config->sagan_fwsam_flag && rulestruct[Event->found].fwsam_src_or_dst )
+    if ( config->sagan_fwsam_flag && RuleBody[Event->found].fwSAM.fwsam_src_or_dst )
         {
             FWSam( Event );
         }
@@ -180,7 +180,7 @@ void Output( _Sagan_Event *Event )
 
 #ifdef HAVE_LIBESMTP
 
-    if ( config->sagan_esmtp_flag && rulestruct[Event->found].email_flag )
+    if ( config->sagan_esmtp_flag && RuleBody[Event->found].Email.email_flag )
         {
             ESMTP_Thread( Event );
         }
@@ -191,9 +191,9 @@ void Output( _Sagan_Event *Event )
     /* External program via rule                                                */
     /****************************************************************************/
 
-    if (  rulestruct[Event->found].external_flag )
+    if (  RuleBody[Event->found].External.call_program )
         {
-            External_Thread( Event, rulestruct[Event->found].external_program );
+            External_Thread( Event, RuleBody[Event->found].External.program_path );
         }
 }
 

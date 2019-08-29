@@ -43,7 +43,7 @@
 
 #endif
 
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganConfig *config;
 
 
@@ -78,17 +78,17 @@ uint32_t Xbit_Return_Tracking_Hash ( int rule_position, int xbit_position, char 
 
     char hash_pair[MAXIP*2] = { 0 };
 
-    if ( rulestruct[rule_position].xbit_direction[xbit_position] == 1 )
+    if ( RuleBody[rule_position].Xbit.xbit_direction[xbit_position] == 1 )
         {
             return(Djb2_Hash(ip_src_char));
         }
 
-    else if ( rulestruct[rule_position].xbit_direction[xbit_position] == 2 )
+    else if ( RuleBody[rule_position].Xbit.xbit_direction[xbit_position] == 2 )
         {
             return(Djb2_Hash(ip_dst_char));
         }
 
-    else if (  rulestruct[rule_position].xbit_direction[xbit_position] == 3 )
+    else if (  RuleBody[rule_position].Xbit.xbit_direction[xbit_position] == 3 )
         {
             snprintf(hash_pair, sizeof(hash_pair), "%s:%s",  ip_src_char, ip_dst_char);
             return(Djb2_Hash(hash_pair));
@@ -97,7 +97,7 @@ uint32_t Xbit_Return_Tracking_Hash ( int rule_position, int xbit_position, char 
 
     /* Should never get here */
 
-    Sagan_Log(WARN, "[%s, line %d] Bad xbit_direction for sid %" PRIu64 "", __FILE__, __LINE__, rulestruct[rule_position].s_sid);
+    Sagan_Log(WARN, "[%s, line %d] Bad xbit_direction for sid %" PRIu64 "", __FILE__, __LINE__, RuleBody[rule_position].s_sid);
     return(0);
 
 }

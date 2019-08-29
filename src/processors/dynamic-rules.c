@@ -46,7 +46,7 @@
 #include "processors/dynamic-rules.h"
 
 struct _SaganConfig *config;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _Rules_Loaded *rules_loaded;
 struct _SaganCounters *counters;
 
@@ -72,7 +72,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
 
             /* If the rule set is loaded (or in our array), nothing else needs to be done */
 
-            if (!strcmp(rulestruct[rule_position].dynamic_ruleset, rules_loaded[i].ruleset))
+            if (!strcmp(RuleBody[rule_position].DynamicLoad.dynamic_ruleset, rules_loaded[i].ruleset))
                 {
 
                     /* Rule was already loaded.  Release mutex and continue as normal */
@@ -93,7 +93,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
 
     memset(&rules_loaded[counters->rules_loaded_count], 0, sizeof(_Rules_Loaded));
 
-    strlcpy(rules_loaded[counters->rules_loaded_count].ruleset, rulestruct[rule_position].dynamic_ruleset, sizeof(rules_loaded[counters->rules_loaded_count].ruleset));
+    strlcpy(rules_loaded[counters->rules_loaded_count].ruleset, RuleBody[rule_position].DynamicLoad.dynamic_ruleset, sizeof(rules_loaded[counters->rules_loaded_count].ruleset));
 
     __atomic_add_fetch(&counters->rules_loaded_count, 1, __ATOMIC_SEQ_CST);
 
@@ -109,7 +109,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
     if ( config->dynamic_load_type == 0 )
         {
 
-            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Dynamically loading '%s'.", rulestruct[rule_position].s_msg, rulestruct[rule_position].dynamic_ruleset);
+            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Dynamically loading '%s'.", RuleBody[rule_position].s_msg, RuleBody[rule_position].DynamicLoad.dynamic_ruleset);
 
             gettimeofday(&tp, 0);
 
@@ -122,7 +122,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
                        "",
                        "",
                        config->default_proto,
-                       rulestruct[rule_position].s_sid,
+                       RuleBody[rule_position].s_sid,
                        config->default_port,
                        config->default_port,
                        rule_position, tp, NULL, 0 );
@@ -132,7 +132,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
             pthread_mutex_lock(&SaganRulesLoadedMutex);
             reload_rules = 1;
 
-            Load_Rules(rulestruct[rule_position].dynamic_ruleset);
+            Load_Rules(RuleBody[rule_position].DynamicLoad.dynamic_ruleset);
 
             reload_rules = 0;
             pthread_mutex_unlock(&SaganRulesLoadedMutex);
@@ -146,7 +146,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
     else if ( config->dynamic_load_type == 1 )
         {
 
-            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Sagan would automatically load '%s' but the 'dynamic_load' processor is set to 'log_only'.", rulestruct[rule_position].s_msg, rulestruct[rule_position].dynamic_ruleset);
+            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Sagan would automatically load '%s' but the 'dynamic_load' processor is set to 'log_only'.", RuleBody[rule_position].s_msg, RuleBody[rule_position].DynamicLoad.dynamic_ruleset);
 
         }
 
@@ -157,7 +157,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
     else if ( config->dynamic_load_type == 2 )
         {
 
-            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Sagan would automatically load '%s' but the 'dynamic_load' processor is set to 'alert'.", rulestruct[rule_position].s_msg, rulestruct[rule_position].dynamic_ruleset);
+            Sagan_Log(NORMAL, "Detected dynamic signature '%s'. Sagan would automatically load '%s' but the 'dynamic_load' processor is set to 'alert'.", RuleBody[rule_position].s_msg, RuleBody[rule_position].DynamicLoad.dynamic_ruleset);
 
 
             gettimeofday(&tp, 0);
@@ -170,7 +170,7 @@ int Sagan_Dynamic_Rules ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, int rule_po
                        "",
                        "",
                        config->default_proto,
-                       rulestruct[rule_position].s_sid,
+                       RuleBody[rule_position].s_sid,
                        config->default_port,
                        config->default_port,
                        rule_position, tp, NULL, 0 );

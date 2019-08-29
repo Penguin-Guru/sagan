@@ -92,7 +92,7 @@ struct _SaganDebug *debug;
 struct _SaganVar *var;
 struct _SaganCounters *counters;
 struct _Rules_Loaded *rules_loaded;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 
 #ifndef HAVE_LIBYAML
 ** You must of LIBYAML installed! **
@@ -116,6 +116,7 @@ void Load_YAML_Config( char *yaml_file )
 
     unsigned char type = 0;
     int sub_type = 0;
+    //unsigned char toggle = 0;
     unsigned char toggle = 0;
 
     char *tok = NULL;
@@ -422,7 +423,7 @@ void Load_YAML_Config( char *yaml_file )
                                     memset(&var[counters->var_count], 0, sizeof(struct _SaganVar));
 
                                     snprintf(var[counters->var_count].var_name, sizeof(var[counters->var_count].var_name)-1, "$%s", value);
-                                    var[counters->var_count].var_name[sizeof(var[counters->var_count].var_name)-1] = 0;
+                                    var[counters->var_count].var_name[sizeof(var[counters->var_count].var_name)-1] = 0;	// Doesn't this just null the last character?
                                     toggle = 0;
 
                                 }
@@ -2726,9 +2727,9 @@ void Load_YAML_Config( char *yaml_file )
             for ( check = a+1; check < counters->rulecount; check++)
                 {
 
-                    if ( rulestruct[check].s_sid == rulestruct[a].s_sid )
+                    if ( RuleBody[check].s_sid == RuleBody[a].s_sid )
                         {
-                            Sagan_Log(ERROR, "[%s, line %d] Detected duplicate signature id number %" PRIu64 ".", __FILE__, __LINE__, rulestruct[check].s_sid, rulestruct[a].s_sid);
+                            Sagan_Log(ERROR, "[%s, line %d] Detected duplicate signature id number %" PRIu64 ".", __FILE__, __LINE__, RuleBody[check].s_sid, RuleBody[a].s_sid);
                         }
                 }
         }

@@ -44,7 +44,7 @@
 #include "rules.h"
 #include "parsers/parsers.h"
 
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 
 int Meta_Content_Search(char *syslog_msg, int rule_position, int meta_content_count)
 {
@@ -54,14 +54,14 @@ int Meta_Content_Search(char *syslog_msg, int rule_position, int meta_content_co
 
     /* Normal "meta_content" search */
 
-    if ( rulestruct[rule_position].meta_content_not[z] == 0 )
+    if ( RuleBody[rule_position].meta_content_not[z] == 0 )
         {
-            for ( i=0; i<rulestruct[rule_position].meta_content_containers[z].meta_counter; i++ )
+            for ( i=0; i<RuleBody[rule_position].Meta[z].meta_counter; i++ )
                 {
-                    if ( rulestruct[rule_position].meta_content_case[z] == 1 )
+                    if ( RuleBody[rule_position].meta_content_case[z] == 1 )
                         {
 
-                            if (Sagan_stristr(syslog_msg, rulestruct[rule_position].meta_content_containers[z].meta_content_converted[i], true))
+                            if (Sagan_stristr(syslog_msg, RuleBody[rule_position].Meta[z].meta_content_converted[i], true))
                                 {
                                     return(true);
                                 }
@@ -70,7 +70,7 @@ int Meta_Content_Search(char *syslog_msg, int rule_position, int meta_content_co
                         {
 
 
-                            if (Sagan_strstr(syslog_msg, rulestruct[rule_position].meta_content_containers[z].meta_content_converted[i]))
+                            if (Sagan_strstr(syslog_msg, RuleBody[rule_position].Meta[z].meta_content_converted[i]))
                                 {
                                     return(true);
                                 }
@@ -83,12 +83,12 @@ int Meta_Content_Search(char *syslog_msg, int rule_position, int meta_content_co
     else
         {
 
-            for ( i=0; i<rulestruct[rule_position].meta_content_containers[z].meta_counter; i++ )
+            for ( i=0; i<RuleBody[rule_position].Meta[z].meta_counter; i++ )
                 {
-                    if ( rulestruct[rule_position].meta_content_case[z] == 1 )
+                    if ( RuleBody[rule_position].meta_content_case[z] == 1 )
                         {
 
-                            if (Sagan_stristr(syslog_msg, rulestruct[rule_position].meta_content_containers[z].meta_content_converted[i], true))
+                            if (Sagan_stristr(syslog_msg, RuleBody[rule_position].Meta[z].meta_content_converted[i], true))
                                 {
                                     return(false);
                                 }
@@ -96,7 +96,7 @@ int Meta_Content_Search(char *syslog_msg, int rule_position, int meta_content_co
                     else
                         {
 
-                            if (Sagan_strstr(syslog_msg, rulestruct[rule_position].meta_content_containers[z].meta_content_converted[i]))
+                            if (Sagan_strstr(syslog_msg, RuleBody[rule_position].Meta[z].meta_content_converted[i]))
                                 {
                                     return(false);
                                 }

@@ -43,7 +43,7 @@ struct _Threshold2_IPC *Threshold2_IPC;
 struct _Sagan_IPC_Counters *counters_ipc;
 
 struct _SaganCounters *counters;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganDebug *debug;
 struct _SaganConfig *config;
 
@@ -84,27 +84,27 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
 
     username_tmp[0] = '\0';
 
-    if ( rulestruct[rule_position].threshold2_method_src == true )
+    if ( RuleBody[rule_position].Threshold.threshold2_method_src == true )
         {
             strlcpy(src_tmp, ip_src, sizeof(src_tmp));
         }
 
-    if ( rulestruct[rule_position].threshold2_method_dst == true )
+    if ( RuleBody[rule_position].Threshold.threshold2_method_dst == true )
         {
             strlcpy(dst_tmp, ip_dst, sizeof(dst_tmp));
         }
 
-    if ( rulestruct[rule_position].threshold2_method_username == true && username != NULL )
+    if ( RuleBody[rule_position].Threshold.threshold2_method_username == true && username != NULL )
         {
             strlcpy(username_tmp, username, sizeof(username_tmp));
         }
 
-    if ( rulestruct[rule_position].threshold2_method_srcport == true )
+    if ( RuleBody[rule_position].Threshold.threshold2_method_srcport == true )
         {
             src_port_tmp = src_port;
         }
 
-    if ( rulestruct[rule_position].threshold2_method_dstport == true )
+    if ( RuleBody[rule_position].Threshold.threshold2_method_dstport == true )
         {
             dst_port_tmp = dst_port;
         }
@@ -116,7 +116,7 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
     for (i = 0; i < counters_ipc->thresh2_count; i++ )
         {
 
-            if ( hash == Threshold2_IPC[i].hash && Threshold2_IPC[i].sid == rulestruct[rule_position].s_sid )
+            if ( hash == Threshold2_IPC[i].hash && Threshold2_IPC[i].sid == RuleBody[rule_position].s_sid )
                 {
 
                     File_Lock(config->shm_thresh2);
@@ -129,9 +129,9 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
                     Threshold2_IPC[i].utime = current_time;
 
                     strlcpy(Threshold2_IPC[i].syslog_message, syslog_message, sizeof(Threshold2_IPC[i].syslog_message));
-                    strlcpy(Threshold2_IPC[i].signature_msg, rulestruct[rule_position].s_msg, sizeof(Threshold2_IPC[i].signature_msg));
+                    strlcpy(Threshold2_IPC[i].signature_msg, RuleBody[rule_position].s_msg, sizeof(Threshold2_IPC[i].signature_msg));
 
-                    if ( thresh_oldtime > rulestruct[rule_position].threshold2_seconds )
+                    if ( thresh_oldtime > RuleBody[rule_position].Threshold.threshold2_seconds )
                         {
                             Threshold2_IPC[i].count=1;
 
@@ -140,7 +140,7 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
                             thresh_log_flag = false;
                         }
 
-                    if ( rulestruct[rule_position].threshold2_count < Threshold2_IPC[i].count )
+                    if ( RuleBody[rule_position].Threshold.threshold2_count < Threshold2_IPC[i].count )
                         {
                             thresh_log_flag = true;
 
@@ -200,12 +200,12 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
 
             Threshold2_IPC[counters_ipc->thresh2_count].count = 1;
             Threshold2_IPC[counters_ipc->thresh2_count].utime = current_time;
-            Threshold2_IPC[counters_ipc->thresh2_count].expire = rulestruct[rule_position].threshold2_seconds;
-            Threshold2_IPC[counters_ipc->thresh2_count].sid = rulestruct[rule_position].s_sid;
-            Threshold2_IPC[counters_ipc->thresh2_count].target_count =rulestruct[rule_position].threshold2_count;
-            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_src = rulestruct[rule_position].threshold2_method_src;
-            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_dst = rulestruct[rule_position].threshold2_method_dst;
-            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_username = rulestruct[rule_position].threshold2_method_username;
+            Threshold2_IPC[counters_ipc->thresh2_count].expire = RuleBody[rule_position].Threshold.threshold2_seconds;
+            Threshold2_IPC[counters_ipc->thresh2_count].sid = RuleBody[rule_position].s_sid;
+            Threshold2_IPC[counters_ipc->thresh2_count].target_count =RuleBody[rule_position].Threshold.threshold2_count;
+            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_src = RuleBody[rule_position].Threshold.threshold2_method_src;
+            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_dst = RuleBody[rule_position].Threshold.threshold2_method_dst;
+            Threshold2_IPC[counters_ipc->thresh2_count].threshold2_method_username = RuleBody[rule_position].Threshold.threshold2_method_username;
 
             strlcpy(Threshold2_IPC[counters_ipc->thresh2_count].ip_src, src_tmp, sizeof(Threshold2_IPC[counters_ipc->thresh2_count].ip_src));
             Threshold2_IPC[counters_ipc->thresh2_count].src_port = src_port_tmp;
@@ -216,7 +216,7 @@ bool Threshold2 ( int rule_position, char *ip_src, uint32_t src_port, char *ip_d
             strlcpy(Threshold2_IPC[counters_ipc->thresh2_count].username, username_tmp, sizeof(Threshold2_IPC[counters_ipc->thresh2_count].username));
 
             strlcpy(Threshold2_IPC[counters_ipc->thresh2_count].syslog_message, syslog_message, sizeof(Threshold2_IPC[counters_ipc->thresh2_count].syslog_message));
-            strlcpy(Threshold2_IPC[counters_ipc->thresh2_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(Threshold2_IPC[counters_ipc->thresh2_count].signature_msg));
+            strlcpy(Threshold2_IPC[counters_ipc->thresh2_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(Threshold2_IPC[counters_ipc->thresh2_count].signature_msg));
 
             counters_ipc->thresh2_count++;
 

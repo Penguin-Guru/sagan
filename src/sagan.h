@@ -93,45 +93,58 @@ size_t strlcpy(char *, const char *, size_t );
 #define SetThreadName(n) (0)
 #endif
 
-bool     Is_Numeric (char *);
-void      To_UpperC(char* const );
-void      To_LowerC(char* const );
-bool	  Check_Endian( void );
+//struct RuleHead_Target *RuleHead_Target;
+
+
 void      Usage( void );
 void      Chroot( const char * );
+void      Droppriv( void );
 void	  Remove_Return(char *);
-int       Classtype_Lookup( const char *, char *, size_t size );
+//int       Classtype_Lookup( const char *, char *, size_t size );
 void      Remove_Spaces(char *);
+void      To_UpperC(char* const );
+void      To_LowerC(char* const );
+void      Sagan_Log( int, const char *, ... );
+bool	  Check_Endian( void );
+bool     Mask2Bit (int, unsigned char * );
+bool     Mask2Bit2 (int, unsigned char * );
+bool     IP2Bit (char *, unsigned char * );
+bool     Is_Numeric (char *);
 void      Between_Quotes( char *, char *str, size_t size );
 double    CalcPct(uint64_t, uint64_t);
-void      Replace_String(char *, char *, char *, char *str, size_t size);
-uint64_t Value_To_Seconds (char *, uint64_t);
-void      Sagan_Log( int, const char *, ... );
-void      Droppriv( void );
 int       DNS_Lookup( char *, char *str, size_t size );
-void      Var_To_Value(char *, char *str, size_t size);
-bool     IP2Bit (char *, unsigned char * );
-bool     Mask2Bit (int, unsigned char * );
-const char *Bit2IP(unsigned char *, char *str, size_t size);
-bool     Validate_HEX (const char *);
-void      Content_Pipe(char *, int, const char *, char *, size_t size);
-bool     is_notroutable ( unsigned char * );
+void      Replace_String(char *, char *, char *, char *str, size_t size);
 bool     is_inrange ( unsigned char *, unsigned char *, int );
-void      Replace_Sagan( char *, char *, char *str, size_t size);
-int       Character_Count ( char *, char *);
-bool     Wildcard( char *, char *);
-void      Open_Log_File( bool, int );
+//bool is_inrange2 ( unsigned char *, struct RuleHead_Target * );
+bool     is_notroutable ( unsigned char * );
+void      Var_To_Value(char *, char *str, size_t size);
+bool     Validate_HEX (const char *);
 int       Check_Var(const char *);
-int       Netaddr_To_Range( char *, unsigned char * );
-void      Strip_Chars(const char *string, const char *chars, char *str);
-bool     Is_IP (char *ipaddr, int ver);
+void      Content_Pipe(char *, int, const char *, char *, size_t size);
+void      Content_Pipe2(char *, const char *, char *, size_t size);
+void      Replace_Sagan( char *, char *, char *str, size_t size);
+bool     Wildcard( char *, char *);
+//void     CloseStream ( FILE *, int *);
+//void     OpenStream ( char *, int *, unsigned long, unsigned long);
+void      Open_Log_File( bool, int );
 bool     File_Lock ( int );
 bool     File_Unlock ( int );
+const char *Bit2IP(unsigned char *, char *str, size_t size);
+int       Netaddr_To_Range( char *, unsigned char *);
+//int       Netaddr_To_Range2( char *, unsigned char *, unsigned char * );
+bool     Starts_With(const char *str, const char *prefix);
+void      Strip_Chars(const char *string, const char *chars, char *str);
+bool      Strip_Chars2(const char *string, const char *chars, char *out);
+void      drop_Not(char *string);
+bool     Is_IP (char *ipaddr, int ver);
+bool Is_IP_Range (char *str);
+
 bool     Check_Content_Not( char * );
 uint32_t  Djb2_Hash( char * );
-bool     Starts_With(const char *str, const char *prefix);
 char      *strrpbrk(const char *str, const char *accept);
-bool Is_IP_Range (char *str);
+
+//uint64_t Value_To_Seconds (char *, uint64_t);
+//int       Character_Count ( char *, char *);
 
 #if defined(F_GETPIPE_SZ) && defined(F_SETPIPE_SZ)
 void      Set_Pipe_Size( FILE * );

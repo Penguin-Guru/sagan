@@ -46,7 +46,7 @@ struct _SaganDebug *debug;
 struct _SaganConfig *config;
 
 struct _Ref_Struct *refstruct;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 
 void Load_Reference( const char *ruleset )
 {
@@ -155,10 +155,10 @@ void Reference_Lookup( int rulemem, int type, char *str, size_t size )
     char refinfo[512];
     char refinfo2[512];
 
-    for (i=0; i <= rulestruct[rulemem].ref_count; i++ )
+    for (i=0; i <= RuleBody[rulemem].ref_count; i++ )
         {
 
-            strlcpy(refinfo, rulestruct[rulemem].s_reference[i], sizeof(refinfo));
+            strlcpy(refinfo, RuleBody[rulemem].s_reference[i], sizeof(refinfo));
 
             tmp = strtok_r(refinfo, ",", &tmptok);
 

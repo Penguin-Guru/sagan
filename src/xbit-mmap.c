@@ -43,7 +43,7 @@
 
 
 struct _SaganCounters *counters;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganDebug *debug;
 struct _SaganConfig *config;
 
@@ -68,10 +68,10 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
     if ( Clean_IPC_Object(XBIT) == 0 )
         {
 
-            for (r = 0; r < rulestruct[rule_position].xbit_count; r++)
+            for (r = 0; r < RuleBody[rule_position].Xbit.xbit_count; r++)
                 {
 
-                    if ( rulestruct[rule_position].xbit_type[r] == XBIT_SET )
+                    if ( RuleBody[rule_position].Xbit.xbit_type[r] == XBIT_SET )
                         {
 
                             hash = Xbit_Return_Tracking_Hash( rule_position, r, ip_src_char, ip_dst_char );
@@ -81,7 +81,7 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
                             for ( x = 0; x < counters_ipc->xbit_count; x++ )
                                 {
 
-                                    if ( hash == Xbit_IPC[x].xbit_hash && rulestruct[rule_position].xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash )
+                                    if ( hash == Xbit_IPC[x].xbit_hash && RuleBody[rule_position].Xbit.xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash )
                                         {
 
                                             if ( debug->debugxbit )
@@ -95,12 +95,12 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
                                             pthread_mutex_lock(&Xbit_Mutex);
 
                                             strlcpy(Xbit_IPC[x].syslog_message, syslog_message, sizeof(Xbit_IPC[x].syslog_message));
-                                            strlcpy(Xbit_IPC[x].signature_msg, rulestruct[rule_position].s_msg, sizeof(Xbit_IPC[x].signature_msg));
-                                            Xbit_IPC[x].xbit_expire = Return_Epoch() + rulestruct[rule_position].xbit_expire[r];
-                                            Xbit_IPC[x].expire = rulestruct[rule_position].xbit_expire[r];
-                                            Xbit_IPC[x].sid = rulestruct[rule_position].s_sid;
+                                            strlcpy(Xbit_IPC[x].signature_msg, RuleBody[rule_position].s_msg, sizeof(Xbit_IPC[x].signature_msg));
+                                            Xbit_IPC[x].xbit_expire = Return_Epoch() + RuleBody[rule_position].Xbit.xbit_expire[r];
+                                            Xbit_IPC[x].expire = RuleBody[rule_position].Xbit.xbit_expire[r];
+                                            Xbit_IPC[x].sid = RuleBody[rule_position].s_sid;
                                             Xbit_IPC[x].xbit_hash = hash;
-                                            Xbit_IPC[x].xbit_name_hash = rulestruct[rule_position].xbit_name_hash[r];
+                                            Xbit_IPC[x].xbit_name_hash = RuleBody[rule_position].Xbit.xbit_name_hash[r];
                                             File_Unlock(config->shm_xbit);
                                             pthread_mutex_unlock(&Xbit_Mutex);
 
@@ -117,15 +117,15 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
                                     File_Lock(config->shm_xbit);
                                     pthread_mutex_lock(&Xbit_Mutex);
 
-                                    strlcpy(Xbit_IPC[counters_ipc->xbit_count].xbit_name, rulestruct[rule_position].xbit_name[r], sizeof(Xbit_IPC[counters_ipc->xbit_count].xbit_name));
+                                    strlcpy(Xbit_IPC[counters_ipc->xbit_count].xbit_name, RuleBody[rule_position].Xbit.xbit_name[r], sizeof(Xbit_IPC[counters_ipc->xbit_count].xbit_name));
                                     strlcpy(Xbit_IPC[counters_ipc->xbit_count].syslog_message, syslog_message, sizeof(Xbit_IPC[counters_ipc->xbit_count].syslog_message));
-                                    strlcpy(Xbit_IPC[counters_ipc->xbit_count].signature_msg, rulestruct[rule_position].s_msg, sizeof(Xbit_IPC[counters_ipc->xbit_count].signature_msg));
+                                    strlcpy(Xbit_IPC[counters_ipc->xbit_count].signature_msg, RuleBody[rule_position].s_msg, sizeof(Xbit_IPC[counters_ipc->xbit_count].signature_msg));
 
-                                    Xbit_IPC[counters_ipc->xbit_count].xbit_expire = Return_Epoch() + rulestruct[rule_position].xbit_expire[r];
-                                    Xbit_IPC[x].expire = rulestruct[rule_position].xbit_expire[r];
-                                    Xbit_IPC[counters_ipc->xbit_count].sid = rulestruct[rule_position].s_sid;
+                                    Xbit_IPC[counters_ipc->xbit_count].xbit_expire = Return_Epoch() + RuleBody[rule_position].Xbit.xbit_expire[r];
+                                    Xbit_IPC[x].expire = RuleBody[rule_position].Xbit.xbit_expire[r];
+                                    Xbit_IPC[counters_ipc->xbit_count].sid = RuleBody[rule_position].s_sid;
                                     Xbit_IPC[counters_ipc->xbit_count].xbit_hash = hash;
-                                    Xbit_IPC[counters_ipc->xbit_count].xbit_name_hash = rulestruct[rule_position].xbit_name_hash[r];
+                                    Xbit_IPC[counters_ipc->xbit_count].xbit_name_hash = RuleBody[rule_position].Xbit.xbit_name_hash[r];
 
                                     if ( debug->debugxbit )
                                         {
@@ -143,7 +143,7 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
 
                     /* UNSET */
 
-                    else if ( rulestruct[rule_position].xbit_type[r] == XBIT_UNSET )
+                    else if ( RuleBody[rule_position].Xbit.xbit_type[r] == XBIT_UNSET )
                         {
 
                             hash = Xbit_Return_Tracking_Hash( rule_position, r, ip_src_char, ip_dst_char );
@@ -153,7 +153,7 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
                             for ( x = 0; x < counters_ipc->xbit_count; x++ )
                                 {
 
-                                    if ( hash == Xbit_IPC[x].xbit_hash && rulestruct[rule_position].xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash )
+                                    if ( hash == Xbit_IPC[x].xbit_hash && RuleBody[rule_position].Xbit.xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash )
                                         {
 
                                             if ( debug->debugxbit )
@@ -169,7 +169,7 @@ void Xbit_Set_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char, char
 
                         }
 
-                } /* for (r = 0; r < rulestruct[rule_position].xbit_count; r++) */
+                } /* for (r = 0; r < RuleBody[rule_position].Xbit.xbit_count; r++) */
         }
 }
 
@@ -189,10 +189,10 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
 
     uint32_t hash;
 
-    for (r = 0; r < rulestruct[rule_position].xbit_count; r++)
+    for (r = 0; r < RuleBody[rule_position].Xbit.xbit_count; r++)
         {
 
-            if ( rulestruct[rule_position].xbit_type[r] == XBIT_ISSET )
+            if ( RuleBody[rule_position].Xbit.xbit_type[r] == XBIT_ISSET )
                 {
 
                     hash = Xbit_Return_Tracking_Hash( rule_position, r, ip_src_char, ip_dst_char );
@@ -201,7 +201,7 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
                         {
 
                             if ( hash == Xbit_IPC[x].xbit_hash &&
-                                    rulestruct[rule_position].xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash &&
+                                    RuleBody[rule_position].Xbit.xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash &&
                                     Xbit_IPC[x].xbit_expire != 0 )
                                 {
 
@@ -221,7 +221,7 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
                         }
                 }
 
-            else if ( rulestruct[rule_position].xbit_type[r] == XBIT_ISNOTSET )
+            else if ( RuleBody[rule_position].Xbit.xbit_type[r] == XBIT_ISNOTSET )
                 {
 
                     hash = Xbit_Return_Tracking_Hash( rule_position, r, ip_src_char, ip_dst_char );
@@ -230,7 +230,7 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
                         {
 
                             if ( hash == Xbit_IPC[x].xbit_hash &&
-                                    rulestruct[rule_position].xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash &&
+                                    RuleBody[rule_position].Xbit.xbit_name_hash[r] == Xbit_IPC[x].xbit_name_hash &&
                                     Xbit_IPC[x].xbit_expire != 0 )
                                 {
                                     if ( Return_Epoch() < Xbit_IPC[x].xbit_expire )
@@ -247,7 +247,7 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
 
                             if ( debug->debugxbit )
                                 {
-                                    Sagan_Log(DEBUG, "[%s, line %d] Xbit '%s' not found for 'isnotset'", __FILE__, __LINE__, rulestruct[rule_position].xbit_name[r]);
+                                    Sagan_Log(DEBUG, "[%s, line %d] Xbit '%s' not found for 'isnotset'", __FILE__, __LINE__, RuleBody[rule_position].Xbit.xbit_name[r]);
                                 }
 
                             xbit_isnotset++;
@@ -258,8 +258,8 @@ bool Xbit_Condition_MMAP(int rule_position, char *ip_src_char, char *ip_dst_char
 
     /* check counts for set/unset! return if == */
 
-    if ( rulestruct[rule_position].xbit_isset_count == xbit_isset &&
-            rulestruct[rule_position].xbit_isnotset_count == xbit_isnotset )
+    if ( RuleBody[rule_position].Xbit.xbit_isset_count == xbit_isset &&
+            RuleBody[rule_position].Xbit.xbit_isnotset_count == xbit_isnotset )
         {
 
             if ( debug->debugxbit )

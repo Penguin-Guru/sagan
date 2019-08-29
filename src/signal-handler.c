@@ -92,7 +92,8 @@ struct _Sagan_Bluedot_Skip *Bluedot_Skip;
 struct _SaganCounters *counters;
 struct _SaganDebug *debug;
 struct _SaganConfig *config;
-struct _Rule_Struct *rulestruct;
+struct RuleHead *RuleHead;
+struct RuleBody *RuleBody;
 struct _Rules_Loaded *rules_loaded;
 struct _Class_Struct *classstruct;
 struct _Sagan_Processor_Generator *generator;
@@ -331,7 +332,8 @@ void Sig_Handler( void )
 
 
                     memset(rules_loaded, 0, sizeof(_Rules_Loaded));
-                    memset(rulestruct, 0, sizeof(_Rule_Struct));
+                    memset(RuleHead, 0, sizeof(RuleHead));
+                    memset(RuleBody, 0, sizeof(RuleBody));
                     memset(classstruct, 0, sizeof(_Class_Struct));
                     memset(generator, 0, sizeof(_Sagan_Processor_Generator));
                     memset(var, 0, sizeof(_SaganVar));

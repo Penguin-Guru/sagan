@@ -59,10 +59,13 @@
 
 #include "version.h"
 
+#include "rules.h"	// For structures to be passed in as arguments.
+
 struct _SaganConfig *config;
 struct _SaganCounters *counters;
 struct _SaganVar *var;
 struct _Sagan_Processor_Generator *generator;
+//struct RuleHead_Target *RuleHead_Target;
 
 bool daemonize;
 bool quiet;
@@ -265,7 +268,9 @@ bool Mask2Bit(int mask, unsigned char *out)
 {
     int i;
     bool ret = false;
+    char tmp[INET_ADDRSTRLEN];
 
+    //Sagan_Log(NORMAL, "Mask2Bit: input = \"%d\".", mask);
     if (mask < 1 || mask > 128)
         {
             return false;
@@ -274,11 +279,56 @@ bool Mask2Bit(int mask, unsigned char *out)
     ret = true;
 
     for (i=0; i<mask; i+=8)
+    //for (i=0; i<=mask; i+=8)
         {
-            out[i/8] = i+8 <= mask ? 0xff : ~((1 << (8 - mask%8)) - 1);
+            out[i/8] = i+8 < mask ? 0xff : ~((1 << (8 - mask%8)) - 1);
+            //out[i/8] = i+8 <= mask ? 0xff : ~((1 << (8 - mask%8)) - 1);
+            //out[i/8] = i+8 < mask ? 0xff : ~(255 >> ((8 - mask%8) - 1));
+            //Sagan_Log(NORMAL, "Mask2Bit: loop = \"%d\" ; out = \"%d\"", i/8, out[i/8]);
         }
+    inet_ntop(AF_INET, &out, tmp, INET_ADDRSTRLEN);
+    //Sagan_Log(NORMAL, "Mask2Bit: Loop done. out (s) = \"%s\" ; out (d) = \"%d\" tmp = \"%s\"", out, out, tmp);
     return ret;
 
+}
+
+bool Mask2Bit2(int mask, unsigned char *out) {
+	int i;
+	bool ret = false;
+	char tmp[INET_ADDRSTRLEN];
+
+	//Sagan_Log(NORMAL, "Mask2Bit: input = \"%d\".", mask);
+	if (mask < 1 || mask > 128) {
+		return false;
+	}
+
+	ret = true;
+
+	/*for (i=0; i<mask; i+=8) {
+		if (i+8 <= mask) out[i/8] = 0xff;
+		else  out[i/8] = ~((1 << (8 - mask%8)) - 1);
+		Sagan_Log(NORMAL, "Mask2Bit: loop = \"%d\" ; out = \"%d\"", i/8, out[i/8]);
+	}*/
+
+
+	/*for (i=0; i<mask; i++) {
+		out[i] = i <= mask ? 1 : 0;
+		Sagan_Log(NORMAL, "Mask2Bit: %d: %c", i, out[i]);
+	}*/
+
+	for (i=0; i<mask; i+=8) {
+		//out[i/8] = i+8 < mask ? 0xff : ~(255 >> ((8 - mask%8) - 1));
+		//out[i/8] = i+8 < mask ? 0xff : ~(255 >> ((8 - mask%8)));
+		//out[i/8] = i+8 < mask ? 0xff : ~(255 << ~((8 - mask%8)));
+		//out[i/8] = i+8 < mask ? 0xff : (255 >> (8 - mask%8));
+		//out[i/8] = i+8 < mask ? 0xff : (255 << (8 - mask%8));
+		out[i/8] = i+8 <= mask ? 0xff : (255 << (8 - mask%8));	// I did not test this with IPv6, but hopefully it works.
+		//Sagan_Log(NORMAL, "Mask2Bit: loop = \"%d\" ; out = \"%d\"", i/8, out[i/8]);
+	}
+
+	inet_ntop(AF_INET, &out, tmp, INET_ADDRSTRLEN);
+	//Sagan_Log(NORMAL, "Mask2Bit: Loop done. out (s) = \"%s\" ; out (d) = \"%d\" tmp = \"%s\"", out, out, tmp);
+	return ret;
 }
 
 /* Converts IP address.  We assume that out is at least 16 bytes.  */
@@ -534,6 +584,21 @@ bool is_inrange ( unsigned char *ip, unsigned char *tests, int count)
         }
     return inrange;
 }
+
+/*bool is_inrange2 ( unsigned char *ip, struct RuleHead_Target *Target ) {
+	int i;
+	bool inrange = false;
+
+	for (i=0; i<Target->address_count; i++) {
+		inrange = true;
+		if (Target->address[i].ipbits & Target->address[i].maskbits != ip & Target->address[i].maskbits) {
+			inrange = false;
+			break;
+		}
+	}
+	if (inrange) break;
+	return inrange;
+}*/
 
 /****************************************************************************/
 /* is_notroutable                                                           */
@@ -838,6 +903,85 @@ void Content_Pipe(char *in_string, int linecount, const char *ruleset, char *str
                     if (!Validate_HEX(final_content_tmp))
                         {
                             Sagan_Log(ERROR, "Invalid '%s' Hex detected at line %d in %s", final_content_tmp, linecount, ruleset);
+                        }
+
+                    sscanf(final_content_tmp, "%x", &x);        /* Convert hex to dec */
+                    snprintf(tmp, sizeof(tmp), "%c", x);        /* Convert dec to ASCII */
+                    strncat(final_content, tmp, 1);             /* Append value */
+
+                    /* Last | found,  but continue processing rest of content as normal */
+
+                    if ( tmp2[i+3] == '|' )
+                        {
+                            pipe_flag = 0;
+                            i=i+3;
+                        }
+                    else
+                        {
+                            i = i+2;
+                        }
+                }
+
+        }
+
+    snprintf(str, size, "%s", final_content);
+}
+
+/******************************************************
+ * Identical to version 1 aside from using RuleSource.
+******************************************************/
+
+void Content_Pipe2(char *in_string, const char *RuleSource, char *str, size_t size )
+{
+
+    int pipe_flag = 0;
+
+    /* Set to RULEBUF.  Some meta_content strings can be rather large! */
+
+    static char final_content[RULEBUF] = { 0 };
+    memset(final_content,0,sizeof(final_content));
+
+    char final_content_tmp[RULEBUF] = { 0 };
+    char tmp2[RULEBUF];
+    int i;
+    int x;
+    char tmp[2];
+
+    strlcpy(tmp2, in_string, sizeof(tmp2));
+
+    pipe_flag = 0;
+
+    for ( i=0; i<strlen(tmp2); i++)
+        {
+
+            if ( tmp2[i] == '|' && pipe_flag == 0 )
+                {
+                    pipe_flag = 1;              /* First | has been found */
+                }
+
+            /* If we haven't found any |'s,  just copy the content verbatium */
+
+            if ( pipe_flag == 0 )
+                {
+                    snprintf(final_content_tmp, sizeof(final_content_tmp), "%c", tmp2[i]);
+                    strncat(final_content, final_content_tmp, 1);
+                }
+
+            /* If | has been found,  start the conversion */
+
+            if ( pipe_flag == 1 )
+                {
+
+                    if ( tmp2[i+1] == ' ' || tmp2[i+2] == ' ' )
+                        {
+                            Sagan_Log(ERROR, "The 'content' option with hex formatting (|HEX|) appears to be incorrect. See: %s ", RuleSource);
+                        }
+
+                    snprintf(final_content_tmp, sizeof(final_content_tmp), "%c%c", tmp2[i+1], tmp2[i+2]);       /* Copy the hex value - ie 3a, 1B, etc */
+
+                    if (!Validate_HEX(final_content_tmp))
+                        {
+                            Sagan_Log(ERROR, "Invalid '%s' Hex detected somewhere in rule: %s ", final_content_tmp, RuleSource);
                         }
 
                     sscanf(final_content_tmp, "%x", &x);        /* Convert hex to dec */
@@ -1279,36 +1423,43 @@ const char *Bit2IP(unsigned char *ipbits, char *str, size_t size)
 /* Return if masked.  Assume that out is at least 32 bytes              */
 /************************************************************************/
 int Netaddr_To_Range( char *ipstr, unsigned char *out )
+//int Netaddr_To_Range( char *ipstr, unsigned char *addr_out, unsigned char *mask_out )
 {
 
     int mask;
     char *t = NULL;
     char _t = '\0';
-    int maxmask = NULL != strchr(ipstr, ':') ? 128 : 32;
+    int maxmask = NULL != strchr(ipstr, ':') ? 128 : 32;	// Ver. 6|4. Isn't this backward?
 
 
+    //Sagan_Log(NORMAL, "ipstr = \"%s\".", ipstr);
     if ( ( t = strchr(ipstr, '/') ) )
+    //if (strchr(ipstr, '/') == NULL)
         {
-            mask = atoi(t+1);
+            mask = atoi(t+1);	// "mask" should not include '/'.
+            //Sagan_Log(NORMAL, "Found mask: \"%d\".", mask);
         }
     else
         {
             mask = maxmask;
+            //Sagan_Log(NORMAL, "Did not find mask. Defaulting to \"%d\".", mask);
         }
 
-    if (t != NULL)
+    if (t != NULL)		// If CIDR notation.
         {
-            _t = t[0];
-            t[0] = '\0';
+            _t = t[0];		// Store the '/'.
+            t[0] = '\0';	// Replace it with null in original string.
         }
 
     IP2Bit(ipstr, out);
+    //IP2Bit(ipstr, addr_out);
 
-    if (t != NULL)
+    if (t != NULL)	// If CIDR notation.
         {
-            t[0] = _t;
+            t[0] = _t;	// Set null back to '/' in original string.
         }
-    Mask2Bit(mask, out+16);
+    Mask2Bit2(mask, out+16);
+    //Mask2Bit(mask, mask_out);
 
     return mask != maxmask;
 } /* netaddr_to_range() */
@@ -1328,7 +1479,7 @@ bool Starts_With(const char *str, const char *prefix)
 void Strip_Chars(const char *string, const char *chars, char *str)
 {
 
-    int i = 0;
+    int i;
 
     for ( i = 0; i<strlen(string); i++)
         {
@@ -1341,6 +1492,41 @@ void Strip_Chars(const char *string, const char *chars, char *str)
 
         }
 
+}
+
+/*****************************************/
+/* Strip SELECT characters from a string */
+/*****************************************/
+// Credits: https://www.rosettacode.org/wiki/Strip_a_set_of_characters_from_a_string#C
+
+bool Strip_Chars2(const char *string, const char *chars, char *out) {
+	int counter = 0;
+	bool did_strip = false;
+
+	for ( ; *string; string++) {
+		if (!strchr(chars, *string)) {
+			out[counter] = *string;
+			++counter;
+		} else did_strip = true;
+	}
+	out[counter] = 0;
+	
+	return did_strip;
+}
+
+/******************************************************/
+/* Check for, and remove, prepended exclamation mark. */
+/******************************************************/
+
+bool Drop_Not(char *string) {
+	int i;
+
+	if (string[0] == '!') {
+		for (i=1; i<=strlen(string); i++) {
+			string[i-1] = string[i];
+		}
+		return true;
+	} else return false;
 }
 
 /***************************************************
