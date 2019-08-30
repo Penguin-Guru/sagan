@@ -132,7 +132,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
     char dbg_SampleAddress[INET_ADDRSTRLEN];
     char dbg_SampleMask[INET_ADDRSTRLEN];
 
-    if (debug->debugflow) Sagan_Log(DEBUG, "DebugFlow: Processing rule with ruleset_id %d...", RuleHead[b].ruleset_id);
+    if (debug->debugflow) Sagan_Log(DEBUG, "[%s, line %d] DebugFlow: Processing rule with ruleset_id %d...", __FILE__, __LINE__, RuleHead[b].ruleset_id);
 
     /*Begin ip_proto*/
 
@@ -140,7 +140,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
         if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Explicit protocol.");
         if (ip_proto == RuleHead[b].ip_proto) {
             c1=1;
-        } else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match protocol: sample=%d ; target=%d", ip_proto, RuleHead[b].ip_proto);
+        } else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match protocol: sample=%d ; target=%d", __FILE__, __LINE__, ip_proto, RuleHead[b].ip_proto);
     } else {	// Match any.
         if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: any protocol.");
         c1=1;
@@ -154,15 +154,15 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
     if(RuleHead[b].target[0].any_address == false) {
         if (debug->debugflow == true) {
             inet_ntop(AF_INET, &src, dbg_SampleAddress, INET_ADDRSTRLEN);
-            Sagan_Log(DEBUG, "\tDebugFlow: Sample address is %s", dbg_SampleAddress);
+            Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Sample address is %s", __FILE__, __LINE__, dbg_SampleAddress);
         }
-        //Sagan_Log(NORMAL, "Flow: processing RuleHead[%d]...", b);
+        //Sagan_Log(NORMAL, "[%s, line %d] Flow: processing RuleHead[%d]...", __FILE__, __LINE__, b);
         for(i=0; i < RuleHead[b].target[0].address_count; i++) {
             if (debug->debugflow == true) {
                 inet_ntop(AF_INET, &RuleHead[b].target[0].address[i].ipbits, dbg_TargetAddress, INET_ADDRSTRLEN);
                 inet_ntop(AF_INET, &RuleHead[b].target[0].address[i].maskbits, dbg_TargetMask, INET_ADDRSTRLEN);
             }
-            //Sagan_Log(NORMAL, "\tFlow: processing address %d...", i);
+            //Sagan_Log(NORMAL, "[%s, line %d] \tFlow: processing address %d...", __FILE__, __LINE__, i);
             w++;
             //f1 = rulestruct[b].flow_1_type[w];
             //f1 = RuleHead[b].target[0].address[i].type;
@@ -170,49 +170,49 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                 ne1++;	// Represents negativity.
 
                 if (RuleHead[b].target[0].address[i].maskbits != 0xffffffff) {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is negative and range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is negative and range.", __FILE__, __LINE__, 0, i);
                     if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1)) {
-                        Sagan_Log(NORMAL, "\tDebugFlow: Matched target address %s netmask %s", dbg_TargetAddress, dbg_TargetMask);
+                        Sagan_Log(NORMAL, "[%s, line %d] \tDebugFlow: Matched target address %s netmask %s", __FILE__, __LINE__, dbg_TargetAddress, dbg_TargetMask);
                         ne1_val++;
                     }
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 0, i);
 
                 } else {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is negative, not range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is negative, not range.", __FILE__, __LINE__, 0, i);
                     memset(ip_convert, 0, MAXIPBIT);
                     memcpy(ip_convert, ip_src, MAXIPBIT);
                     if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT) ) {
-                        Sagan_Log(NORMAL, "\tDebugFlow: Matched target address %s netmask %s", dbg_TargetAddress, dbg_TargetMask);
+                        Sagan_Log(NORMAL, "[%s, line %d] \tDebugFlow: Matched target address %s netmask %s", __FILE__, __LINE__, dbg_TargetAddress, dbg_TargetMask);
                         ne1_val++;
                     }
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 0, i);
                 }
 
             } else {	// is_not == false.
                 eq1++;	// Represents positivity.
 
                 if (RuleHead[b].target[0].address[i].maskbits != 0xffffffff) {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is positive and range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is positive and range.", __FILE__, __LINE__, 0, i);
                     if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1)) {
-                        Sagan_Log(NORMAL, "\tDebugFlow: Matched target address %s netmask %s", dbg_TargetAddress, dbg_TargetMask);
+                        Sagan_Log(NORMAL, "[%s, line %d] \tDebugFlow: Matched target address %s netmask %s", __FILE__, __LINE__, dbg_TargetAddress, dbg_TargetMask);
                         eq1_val++;
                     }
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 0, i);
 
                 } else {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is positive, not range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is positive, not range.", __FILE__, __LINE__, 0, i);
                     memset(ip_convert, 0, MAXIPBIT);
                     memcpy(ip_convert, ip_src, MAXIPBIT);
                     if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT)) {
-                        Sagan_Log(NORMAL, "\tDebugFlow: Matched target address %s netmask %s", dbg_TargetAddress, dbg_TargetMask);
+                        Sagan_Log(NORMAL, "[%s, line %d] \tDebugFlow: Matched target address %s netmask %s", __FILE__, __LINE__, dbg_TargetAddress, dbg_TargetMask);
                         eq1_val++;
                     }
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 0, i);
                 }
             }
         }
     } else {	// any_address == true.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d any address.", 0);
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d any address.", __FILE__, __LINE__, 0);
         a1=1;
     }
 
@@ -244,34 +244,34 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                 ne3++;
 
                 if (RuleHead[b].target[0].port[u].high == RuleHead[b].target[0].port[u].low) {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is negative, not range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is negative, not range.", __FILE__, __LINE__, 0, i);
                     if(port_src == RuleHead[b].target[0].port[i].low) ne3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 0, i);
 
                 } else {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is negative and range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is negative and range.", __FILE__, __LINE__, 0, i);
                     if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high) ne3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 0, i);
                 }
 
             } else {	// is_not == false.
                 eq3++;
 
                 if (RuleHead[b].target[0].port[u].high == RuleHead[b].target[0].port[u].low) {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is positive, not range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is positive, not range.", __FILE__, __LINE__, 0, i);
                     if(port_src == RuleHead[b].target[0].port[i].low) eq3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 0, i);
 
                 } else {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is positive and range.", 0, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is positive and range.", __FILE__, __LINE__, 0, i);
                     if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high) eq3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 0, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 0, i);
                 }
 
             }	// is_not.
         }	// for port_count.
     } else {	// any_port == true.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d any port.", 0);
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d any port.", __FILE__, __LINE__, 0);
         b1=1;
     }
 
@@ -308,37 +308,37 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                     ne1++;
 
                     if (RuleHead[b].target[1].address[i].maskbits != 0xffffffff) {	// Is range.
-		        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is negative and range.", 1, i);
+		        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is negative and range.", __FILE__, __LINE__, 1, i);
                         if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1)) ne1_val++;
-                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 1, i);
+                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 1, i);
 
                     } else {	// Not range.
-		        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is negative, not range.", 1, i);
+		        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is negative, not range.", __FILE__, __LINE__, 1, i);
                         memset(ip_convert, 0, MAXIPBIT);
                         memcpy(ip_convert, ip_src, MAXIPBIT);
                         if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT) ) ne1_val++;
-                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 1, i);
+                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 1, i);
                    }
 
                 } else {	// is_not == false.
                     eq1++;
 
                     if (RuleHead[b].target[1].address[i].maskbits != 0xffffffff) {	// Is range.
-		        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is positive and range.", 1, i);
+		        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is positive and range.", __FILE__, __LINE__, 1, i);
                         if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1)) eq1_val++;
-                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 1, i);
+                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 1, i);
 
                     } else {	// Not range.
-		        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address %d is positive, not range.", 1, i);
+		        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d address %d is positive, not range.", __FILE__, __LINE__, 1, i);
                         memset(ip_convert, 0, MAXIPBIT);
                         memcpy(ip_convert, ip_src, MAXIPBIT);
                         if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT)) eq1_val++;
-                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d address %d.", 1, i);
+                        else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d address %d.", __FILE__, __LINE__, 1, i);
                     }
                }
           }
     } else {	// any_address == true.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d any address.", 1);
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d any address.", __FILE__, __LINE__, 1);
         a2=1;
     }
 
@@ -360,7 +360,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
         if(failed > 0) return 0;
     }
 
-    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: ruleset_id %d address(es) matched.", b);
+    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: ruleset_id %d address(es) matched.", __FILE__, __LINE__, b);
 
     /*Begin port_2*/
 
@@ -371,34 +371,34 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
                 ne3++;
 
                 if (RuleHead[b].target[1].port[u].high == RuleHead[b].target[1].port[u].low) {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is negative, not range.", 1, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is negative, not range.", __FILE__, __LINE__, 1, i);
                     if(port_src == RuleHead[b].target[1].port[i].low) ne3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 1, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 1, i);
 
                 } else {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is negative and range.", 1, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is negative and range.", __FILE__, __LINE__, 1, i);
                     if(port_src >= RuleHead[b].target[1].port[i].low && port_src <= RuleHead[b].target[1].port[i].high) ne3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 1, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 1, i);
                 }
 
             } else {	// is_not == false.
                 eq3++;
 
                 if (RuleHead[b].target[1].port[u].high == RuleHead[b].target[1].port[u].low) {	// Not range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is positive, not range.", 1, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is positive, not range.", __FILE__, __LINE__, 1, i);
                     if(port_src == RuleHead[b].target[1].port[i].low) eq3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 1, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 1, i);
 
                 } else {	// Is range.
-		    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d port %d is positive and range.", 1, i);
+		    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d port %d is positive and range.", __FILE__, __LINE__, 1, i);
                     if(port_src >= RuleHead[b].target[1].port[i].low && port_src <= RuleHead[b].target[1].port[i].high) eq3_val++;
-                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Failed to match target %d port %d.", 1, i);
+                    else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match target %d port %d.", __FILE__, __LINE__, 1, i);
                 }
 
             }	// is_not.
         }	// for port_count.
     } else {	// any_port == true.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d any port.", 1);
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Target %d any port.", __FILE__, __LINE__, 1);
         b2=1;
     }
 
