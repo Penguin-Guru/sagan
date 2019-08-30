@@ -120,7 +120,6 @@ struct _JSON_Message_Map *JSON_Message_Map = NULL;
 
 /* Already Init'ed */
 
-struct _Rule_Struct *rulestruct;
 struct _Sagan_Ignorelist *SaganIgnorelist;
 
 #ifdef WITH_BLUEDOT
