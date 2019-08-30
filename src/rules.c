@@ -87,7 +87,6 @@ int liblognorm_count;
 #define PCRE_STUDY_JIT_COMPILE 0
 #endif
 
-struct _Rule_Struct *rulestruct = NULL;
 struct _Class_Struct *classstruct = NULL;
 struct _Sagan_Ruleset_Track *Ruleset_Track = NULL;
 

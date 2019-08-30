@@ -1,3 +1,30 @@
+/*
+** Copyright (C) 2009-2019 Quadrant Information Security <quadrantsec.com>
+** Copyright (C) 2009-2019 Champ Clark III <cclark@quadrantsec.com>
+**
+** This program is free software; you can redistribute it and/or modify
+** it under the terms of the GNU General Public License Version 2 as
+** published by the Free Software Foundation.  You may not use, modify or
+** distribute this program under any other version of the GNU General
+** Public License.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program; if not, write to the Free Software
+** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
+/* client-stats.c
+ *
+ * This writes out data about clients reporting to Sagan.  In particular,  the last
+ * time a client send Sagan data along with a copy of "example" data (program/
+ * message) every so often (via the "data-interval" option).
+ *
+ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"             /* From autoconf */
@@ -10,6 +37,9 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <string.h>
+#include <pthread.h>
+#include <stdlib.h>
+
 
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
@@ -21,11 +51,23 @@
 #include "sagan-defs.h"
 #include "sagan-config.h"
 
+#include "lockfile.h"
+
 #include "processors/client-stats.h"
+
+uint64_t old_epoch = 0;
 
 struct _SaganConfig *config;
 struct _SaganCounters *counters;
-struct _Client_Stats_Struct *Client_Stats;
+struct _SaganDebug *debug;
+
+struct _Client_Stats_Struct *Client_Stats = NULL;
+
+pthread_mutex_t ClientStatsMutex=PTHREAD_MUTEX_INITIALIZER;
+
+/****************************************************************************
+ * Client_Stats_Iint
+ ****************************************************************************/
 
 void Client_Stats_Init( void )
 {
@@ -37,8 +79,22 @@ void Client_Stats_Init( void )
         }
 
     config->client_stats_file_stream_status = true;
+    counters->client_stats_count = 0;
+
+    Client_Stats = malloc(config->client_stats_max * sizeof(struct _Client_Stats_Struct));
+
+    if ( Client_Stats == NULL )
+        {
+            Sagan_Log(ERROR, "[%s, line %d] Failed to allocate memory for _Client_Stats_Struct. Abort!", __FILE__, __LINE__);
+        }
+
+    memset(Client_Stats, 0, sizeof(struct _Client_Stats_Struct));
 
 }
+
+/****************************************************************************
+ * Client_Stats_Close - Closes clients stats files
+ ****************************************************************************/
 
 void Client_Stats_Close( void )
 {
@@ -48,11 +104,18 @@ void Client_Stats_Close( void )
 
 }
 
+/****************************************************************************
+ * Client_Stats_Handler - Thread that writes out client stat data
+ ****************************************************************************/
 
 void Client_Stats_Handler( void )
 {
 
     struct json_object *jobj = NULL;
+
+    struct timeval tp;
+    char timebuf[64] = { 0 };
+
 
     int i=0;
 
@@ -65,16 +128,29 @@ void Client_Stats_Handler( void )
     while(1)
         {
 
+            if ( debug->debugclient_stats )
+                {
+                    Sagan_Log(DEBUG,"[%s, line %d] Writing client stats %s.", __FILE__, __LINE__, config->client_stats_file_name );
+                }
+
+
+	    gettimeofday(&tp, 0);
+	    CreateIsoTimeString(&tp, timebuf, sizeof(timebuf));
+
             jobj = json_object_new_object();
 
             json_object *jarray_ip = json_object_new_array();
             json_object *jarray_epoch = json_object_new_array();
             json_object *jarray_program = json_object_new_array();
-	    json_object *jarray_message = json_object_new_array();
+            json_object *jarray_message = json_object_new_array();
 
+            json_object *jdate = json_object_new_string(timebuf);
+            json_object_object_add(jobj,"timestamp", jdate);
 
             json_object *jevent_type = json_object_new_string( "client_stats" );
             json_object_object_add(jobj,"event_type", jevent_type);
+
+            /* Update any existing client stats */
 
             for ( i = 0; i < counters->client_stats_count; i++ )
                 {
@@ -93,13 +169,20 @@ void Client_Stats_Handler( void )
 
                 }
 
-            json_object_object_add(jobj,"ip_addresses", jarray_ip);
-            json_object_object_add(jobj,"timestamp", jarray_epoch);
-            json_object_object_add(jobj,"program", jarray_program);
-  	    json_object_object_add(jobj,"message", jarray_message);
+            /* If there is no data,  don't bother writing */
 
-            fprintf(config->client_stats_file_stream, "%s\n", json_object_to_json_string(jobj));
-            fflush(config->client_stats_file_stream);
+            if ( counters->client_stats_count != 0 )
+                {
+
+                    json_object_object_add(jobj,"ip_addresses", jarray_ip);
+                    json_object_object_add(jobj,"timestamp", jarray_epoch);
+                    json_object_object_add(jobj,"program", jarray_program);
+                    json_object_object_add(jobj,"message", jarray_message);
+
+                    fprintf(config->client_stats_file_stream, "%s\n", json_object_to_json_string(jobj));
+                    fflush(config->client_stats_file_stream);
+
+                }
 
             json_object_put(jobj);
             sleep(config->client_stats_time);
@@ -108,16 +191,20 @@ void Client_Stats_Handler( void )
 
 }
 
+/****************************************************************************
+ * Client_Stats_Add_Update_IP - Adds IP addresses and other data to the
+ * array of systems Sagan is keeping track of.
+ ****************************************************************************/
+
 void Client_Stats_Add_Update_IP( char *ip, char *program, char *message )
 {
 
-    int i = 0;
-    bool flag = false;
     uint32_t hash = Djb2_Hash( ip );
 
+    int i = 0;
     time_t t;
     struct tm *now;
-    uint32_t epoch = 0;
+    uint64_t epoch = 0;
     char timet[20];
 
     t = time(NULL);
@@ -125,46 +212,74 @@ void Client_Stats_Add_Update_IP( char *ip, char *program, char *message )
     strftime(timet, sizeof(timet), "%s",  now);
     epoch = atol(timet);
 
+
     for ( i = 0; i < counters->client_stats_count; i++ )
         {
 
-            if ( hash == Client_Stats[i].hash )
+            /* Search here */
+
+            if ( Client_Stats[i].hash == hash )
                 {
-                   Client_Stats[i].epoch = epoch;
+                    Client_Stats[i].epoch = epoch;
 
-		   /* DEBUG needs to be an interval, not every time */
+                    if ( Client_Stats[i].epoch > Client_Stats[i].old_epoch + config->client_stats_interval)
+                        {
 
-		   strlcpy( Client_Stats[i].program, program, sizeof(Client_Stats[i].program) );
-		   strlcpy( Client_Stats[i].message, message, sizeof(Client_Stats[i].message) );
-		   
-//		   printf("Got hit: %d, %d, %s\n", Client_Stats[i].hash, Client_Stats[i].epoch, Client_Stats[i].ip);
+
+                            if ( debug->debugclient_stats )
+                                {
+                                    Sagan_Log(DEBUG,"[%s, line %d] Updating program/message data for IP address %s [%d]", __FILE__, __LINE__, ip, i);
+                                }
+
+                            pthread_mutex_lock(&ClientStatsMutex);
+
+                            strlcpy( Client_Stats[i].program, program, sizeof(Client_Stats[i].program) );
+                            strlcpy( Client_Stats[i].message, message, sizeof(Client_Stats[i].message) );
+
+                            Client_Stats[i].old_epoch = epoch;
+
+                            pthread_mutex_unlock(&ClientStatsMutex);
+
+                        }
+
                     return;
+
                 }
 
         }
 
-    /* Allocate memory for new stats */
-
-    Client_Stats = (_Client_Stats_Struct *) realloc(Client_Stats, (counters->client_stats_count+1) * sizeof(_Client_Stats_Struct));
-
-    if ( Client_Stats == NULL )
+    if ( counters->client_stats_count < config->client_stats_max )
         {
-            Sagan_Log(ERROR, "[%s, line %d] Failed to reallocate memory for _Client_Stats. Abort!", __FILE__, __LINE__);
+
+            pthread_mutex_lock(&ClientStatsMutex);
+
+            if ( debug->debugclient_stats )
+                {
+                    Sagan_Log(DEBUG,"[%s, line %d] Adding client IP address %s [%d]", __FILE__, __LINE__, ip, counters->client_stats_count);
+                }
+
+
+            Client_Stats[counters->client_stats_count].hash = hash;
+            Client_Stats[counters->client_stats_count].epoch = epoch;
+            Client_Stats[counters->client_stats_count].old_epoch = epoch;
+
+            strlcpy(Client_Stats[counters->client_stats_count].ip, ip, sizeof(Client_Stats[counters->client_stats_count].ip));
+            strlcpy( Client_Stats[counters->client_stats_count].program, program, sizeof(Client_Stats[counters->client_stats_count].program ) );
+            strlcpy( Client_Stats[counters->client_stats_count].message, message, sizeof(Client_Stats[counters->client_stats_count].message ) );
+
+            counters->client_stats_count++;
+
+            pthread_mutex_unlock(&ClientStatsMutex);
+
         }
+    else
 
-    Client_Stats[counters->client_stats_count].hash = hash;
-    Client_Stats[counters->client_stats_count].epoch = epoch;
+        {
 
-    strlcpy( Client_Stats[counters->client_stats_count].program, program, sizeof(Client_Stats[counters->client_stats_count].program ) );
+            Sagan_Log(WARN, "[%s, line %d] 'clients-stats' processors ran out of space.  Consider increasing 'max-clients'!", __FILE__, __LINE__);
 
-    strlcpy( Client_Stats[counters->client_stats_count].message, message, sizeof(Client_Stats[counters->client_stats_count].message ) );
 
-    strlcpy(Client_Stats[counters->client_stats_count].ip, ip, sizeof(Client_Stats[counters->client_stats_count].ip));
-
-    __atomic_add_fetch(&counters->client_stats_count, 1, __ATOMIC_SEQ_CST);
-
-//printf("In add! %s, %d, %d\n", ip, hash, epoch);
-
+        }
 
 }
 

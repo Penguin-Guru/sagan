@@ -165,20 +165,6 @@ int       PageSupportsRWX(void);
 #endif /* HAVE_SYS_MMAN_H */
 #endif
 
-typedef struct _SyslogInput _SyslogInput;
-struct _SyslogInput
-{
-    char syslog_host[MAX_SYSLOG_HOST];
-    char syslog_facility[MAX_SYSLOG_FACILITY];
-    char syslog_priority[MAX_SYSLOG_PRIORITY];
-    char syslog_level[MAX_SYSLOG_LEVEL];
-    char syslog_tag[MAX_SYSLOG_TAG];
-    char syslog_date[MAX_SYSLOG_DATE];
-    char syslog_time[MAX_SYSLOG_TIME];
-    char syslog_program[MAX_SYSLOG_PROGRAM];
-    char syslog_message[MAX_SYSLOGMSG];
-};
-
 typedef struct _SaganDNSCache _SaganDNSCache;
 struct _SaganDNSCache
 {
@@ -371,6 +357,7 @@ struct _SaganDebug
     bool debugparse_ip;
     bool debugrules;
     bool debugflow;
+    bool debugclient_stats;
 
 #ifdef HAVE_LIBMAXMINDDB
     bool debuggeoip2;
@@ -411,7 +398,7 @@ struct _Sagan_Proc_Syslog
     char syslog_program[MAX_SYSLOG_PROGRAM];
     char syslog_message[MAX_SYSLOGMSG];
 
-    char syslog[MAX_SYSLOGMSG];
+//    char syslog[MAX_SYSLOGMSG];
 
 #ifdef HAVE_LIBFASTJSON
 

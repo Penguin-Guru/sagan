@@ -1433,7 +1433,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->pp_sagan_track_clients == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'track_clients' - 'timeout' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'track_clients' - 'timeout' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
 
                                                 }
 
@@ -1467,10 +1467,39 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->client_stats_time == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'client_stats' - 'time' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'client_stats' - 'time' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
 
                                         }
+
+                                    else if (!strcmp(last_pass, "data-interval" ) && config->client_stats_flag == true )
+                                        {
+
+                                            Var_To_Value(value, tmp, sizeof(tmp));
+                                            config->client_stats_interval = atoi(tmp);
+
+                                            if ( config->client_stats_interval == 0 )
+                                                {
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'client_stats' - 'data-interval' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
+                                                }
+
+                                        }
+
+// client_stats_max
+                                    else if (!strcmp(last_pass, "max-clients" ) && config->client_stats_flag == true )
+                                        {
+
+                                            Var_To_Value(value, tmp, sizeof(tmp));
+                                            config->client_stats_max = atoi(tmp);
+
+                                            if ( config->client_stats_max == 0 )
+                                                {
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'client_stats' - 'max-clients' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
+                                                }
+
+                                        }
+
+
 
                                 }
 
@@ -1495,7 +1524,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->perfmonitor_time == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'perfmonitor' - 'time' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'perfmonitor' - 'time' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
 
                                         }
@@ -1587,7 +1616,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->bluedot_ip_max_cache == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-ip-cache' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-ip-cache' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
 
                                         }
@@ -1600,7 +1629,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_hash_max_cache == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-hash-cache' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-hash-cache' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
 
                                         }
@@ -1613,7 +1642,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_url_max_cache == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-url-cache' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-url-cache' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
 
                                         }
@@ -1625,7 +1654,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_filename_max_cache == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-file-cache' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'max-file-cache' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 
@@ -1636,7 +1665,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_ip_queue == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'ip-queue' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'ip-queue' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 
@@ -1648,7 +1677,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_hash_queue == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'hash-queue' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'hash-queue' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 
@@ -1659,7 +1688,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_url_queue == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'url-queue' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'url-queue' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 
@@ -1670,7 +1699,7 @@ void Load_YAML_Config( char *yaml_file )
 
                                             if ( config->bluedot_filename_queue == 0 )
                                                 {
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'filename-queue' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'filename-queue' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 
@@ -1684,7 +1713,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->bluedot_timeout == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'cache-timeout' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'bluedot' - 'cache-timeout' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
 
                                                 }
                                         }
@@ -1812,7 +1841,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->dynamic_load_sample_rate == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'dynamic_load' - 'sample_rate' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : 'dynamic_load' - 'sample_rate' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
 
                                                 }
 
@@ -1901,7 +1930,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->rule_tracking_time == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : rule_tracking''' - 'time' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'processor' : rule_tracking''' - 'time' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
 
                                                 }
 
@@ -2105,7 +2134,7 @@ void Load_YAML_Config( char *yaml_file )
                                             if ( config->unified2_limit == 0 )
                                                 {
 
-                                                    Sagan_Log(ERROR, "[%s, line %d] 'outputs' : 'unified2' - 'limit' has to be a non-zero number. Abort!!", __FILE__, __LINE__);
+                                                    Sagan_Log(ERROR, "[%s, line %d] 'outputs' : 'unified2' - 'limit' has to be a non-zero value. Abort!!", __FILE__, __LINE__);
                                                 }
                                         }
 

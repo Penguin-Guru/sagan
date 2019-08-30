@@ -154,6 +154,8 @@ struct _SaganConfig
     bool        client_stats_flag;
     char 	client_stats_file_name[MAXPATH];
     int 	client_stats_time;
+    uint16_t	client_stats_interval;
+    uint32_t 	client_stats_max;
 
     bool        client_stats_file_stream_status;
     FILE	*client_stats_file_stream;

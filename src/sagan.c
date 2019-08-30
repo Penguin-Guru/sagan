@@ -134,6 +134,7 @@ struct _Sagan_Ignorelist *SaganIgnorelist;
 
 struct _Sagan_Pass_Syslog *SaganPassSyslog = NULL;
 
+
 int proc_msgslot = 0;
 int proc_running = 0;
 
@@ -210,7 +211,6 @@ int main(int argc, char **argv)
     pthread_attr_t thread_client_stats_attr;
     pthread_attr_init(&thread_client_stats_attr);
     pthread_attr_setdetachstate(&thread_client_stats_attr,  PTHREAD_CREATE_DETACHED);
-
 
     /****************************************************************************/
     /* Various local variables						        */
@@ -482,6 +482,11 @@ int main(int argc, char **argv)
                             debug->debugflow = true;
                             debugflag = true;
                         }
+                    if (Sagan_strstr(optarg, "client-stats"))
+                        {
+                            debug->debugclient_stats = true;
+                            debugflag = true;
+                        }
 
 #ifdef HAVE_LIBMAXMINDDB
 
@@ -746,6 +751,8 @@ int main(int argc, char **argv)
     Sagan_Log(NORMAL, "Nested JSON: %s", Syslog_JSON_Map->is_nested == true ? "Yes":"No");
     Sagan_Log(NORMAL, "Parse JSON in message: %s", config->parse_json_message == true ? "Enabled":"Disabled");
     Sagan_Log(NORMAL, "Parse JSON in program: %s", config->parse_json_program == true ? "Enabled":"Disabled");
+    Sagan_Log(NORMAL, "Client Stats         : %s", config->client_stats_flag == true ? "Enabled":"Disabled");
+
 
 #endif
 
@@ -809,6 +816,7 @@ int main(int argc, char **argv)
                     Sagan_Log(ERROR, "[%s, line %d] Error creating Perfmonitor thread [error: %d].", __FILE__, __LINE__, rc);
                 }
         }
+
 
     if ( config->client_stats_flag )
         {
