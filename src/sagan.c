@@ -472,6 +472,18 @@ int main(int argc, char **argv)
                             debugflag = true;
                         }
 
+                    if (Sagan_strstr(optarg, "rules"))
+                        {
+                            debug->debugrules = true;
+                            debugflag = true;
+                        }
+
+                    if (Sagan_strstr(optarg, "flow"))
+                        {
+                            debug->debugflow = true;
+                            debugflag = true;
+                        }
+
 #ifdef HAVE_LIBMAXMINDDB
 
                     if (Sagan_strstr(optarg, "geoip"))
@@ -724,8 +736,7 @@ int main(int argc, char **argv)
 
 #endif
 
-    Sagan_Log(NORMAL, "Configuration file %s loaded and %d rules loaded.", config->sagan_config, counters->rulecount);
-    Sagan_Log(NORMAL, "There are %d rules loaded.", counters->rulecount);
+    Sagan_Log(NORMAL, "Loaded configuration file \"%s\" with %d rule(s).", config->sagan_config, counters->rulecount);
     Sagan_Log(NORMAL, "%d flexbit(s) are in use.", counters->flexbit_total_counter);
     Sagan_Log(NORMAL, "%d xbit(s) are in use.", counters->xbit_total_counter);
     Sagan_Log(NORMAL, "%d dynamic rule(s) are loaded.", counters->dynamic_rule_count);

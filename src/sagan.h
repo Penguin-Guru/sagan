@@ -369,6 +369,8 @@ struct _SaganDebug
     bool debugipc;
     bool debugjson;
     bool debugparse_ip;
+    bool debugrules;
+    bool debugflow;
 
 #ifdef HAVE_LIBMAXMINDDB
     bool debuggeoip2;

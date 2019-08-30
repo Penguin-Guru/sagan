@@ -74,6 +74,8 @@ struct RuleHead {
 	/* Targeting: */
 	int direction;
 	struct RuleHead_Target target[2];	// Two target fields.
+	bool AllAny;
+	//bool is_active;
 };
 
 

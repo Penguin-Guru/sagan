@@ -851,7 +851,7 @@ int Sagan_Engine ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, bool dynamic_rule_
                                         }
 
 
-                                    /* parse_dst_ip: {postion} */
+                                    /* parse_dst_ip: {position} */
 
                                     if ( ip_dst_flag == false && RuleBody[b].s_find_dst_ip == true )
                                         {
@@ -937,7 +937,7 @@ int Sagan_Engine ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, bool dynamic_rule_
 							    !strcmp(SaganProcSyslog_LOCAL->syslog_host, "::ffff:127.0.0.1" ) )
 
 							{
-                                                            if ( config->change_localhosts == true ) {
+                                                            if ( config->change_localhosts == true ) {	// Placement should be swapped with the address checks.
 							        ip_src = config->sagan_host;
                                                             }
 							}
@@ -964,7 +964,7 @@ int Sagan_Engine ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, bool dynamic_rule_
 							    !strcmp(SaganProcSyslog_LOCAL->syslog_host, "::1" ) ||
 							    !strcmp(SaganProcSyslog_LOCAL->syslog_host, "::ffff:127.0.0.1" ) )
 							{
-                                                          if ( config->change_localhosts == true ) {
+                                                          if ( config->change_localhosts == true ) {	// Placement should be swapped with the address checks.
                                                               ip_dst = config->sagan_host;
                                                           }
 							}
@@ -1006,13 +1006,16 @@ int Sagan_Engine ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, bool dynamic_rule_
 
                                     strlcpy(s_msg, RuleBody[b].s_msg, sizeof(s_msg));
 
-                                    /* Check for flow of rule - has_flow is set as rule loading.  It 1, then
+                                    /* Check for flow of rule - is_active is set as rule loading.  It 1, then
                                     the rule has some sort of flow.  It 0,  rule is set any:any/any:any */
 
-                                    if ( RuleHead[b].target[0].any_address == false || RuleHead[b].target[0].any_port == false || RuleHead[b].target[1].any_address == false || RuleHead[b].target[1].any_port == false )
+                                    //if (RuleHead[b].ip_proto > 0 || RuleHead[b].target[0].address_count > 0 || RuleHead[b].target[0].port_count > 0 || RuleHead[b].target[1].address_count > 0 || RuleHead[b].target[1].port_count > 0)
+                                    //if (RuleHead[b].target[1].any_address == false || RuleHead[b].target[1].any_port == false || RuleHead[b].ip_proto > 0 || RuleHead[b].target[0].any_address == false || RuleHead[b].target[0].any_port == false)
+                                    if (RuleHead[b].AllAny == true)
                                         {
 
                                             check_flow_return = Check_Flow( b, proto, ip_src_bits, ip_srcport_u32, ip_dst_bits, ip_dstport_u32);
+                                            if (debug->DebugFlow > 0) Sagan_Log(DEBUG, "[%s, line %d] DebugFlow: check_flow_return = \"s\"", check_flow_return ? "true" : "false");
 
                                             if(check_flow_return == false)
                                                 {

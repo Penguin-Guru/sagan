@@ -129,391 +129,227 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
 
     /*Begin ip_proto*/
 
-    if(RuleHead[b].ip_proto != 0)
-        {
-            if(ip_proto == RuleHead[b].ip_proto)
-                {
-                    c1=1;
-                }
-        }
-    else
-        {
-            c1=1;
-        }
+    if(RuleHead[b].ip_proto != 0) {
+            if(ip_proto == RuleHead[b].ip_proto) c1=1;	// Explicit match.
+    } else c1=1;	// Match any.
 
-    if(c1 != 1)
-        {
-            return 0;
-        }
+    if(c1 != 1) return 0;	// Unmatched protocol.
 
     /*Begin flow_1*/
 
-    //if(rulestruct[b].a_has_address == true)
-    //if(RuleHead[b].target[0].keyword_address == 0)
-    if(RuleHead[b].target[0].any_address == false)
-        {
-		//Sagan_Log(NORMAL, "Flow: processing RuleHead[%d]...", b);
-            //for(i=0; i < rulestruct[b].flow_1_counter; i++)
-            for(i=0; i < RuleHead[b].target[0].address_count; i++)
-                {
-			//Sagan_Log(NORMAL, "\tFlow: processing address %d...", i);
-                    w++;
-                    //f1 = rulestruct[b].flow_1_type[w];
-                    //f1 = RuleHead[b].target[0].address[i].type;
-                    f1 = RuleHead[b].target[0].address[i].keyword;	// THIS WILL NOT WORK! FIX IT LATER.
-			//Sagan_Log(NORMAL, "\t\tFlow: address is type %d...", f1);
+    if(RuleHead[b].target[0].any_address == false) {
+        //Sagan_Log(NORMAL, "Flow: processing RuleHead[%d]...", b);
+         for(i=0; i < RuleHead[b].target[0].address_count; i++) {
+		//Sagan_Log(NORMAL, "\tFlow: processing address %d...", i);
+                w++;
+                //f1 = rulestruct[b].flow_1_type[w];
+                //f1 = RuleHead[b].target[0].address[i].type;
+                //f1 = RuleHead[b].target[0].address[i].keyword;	// THIS WILL NOT WORK! FIX IT LATER.
+                if (RuleHead[b].target[0].address[i].is_not == true) {
 
-                    if(f1 == 0)
-                        {
+                    if (RuleHead[b].target[0].address[i].maskbits != 0xffffffff) {	// Is range.
                             ne1++;
+                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1)) ne1_val++;
 
-                            //if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
-                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1))
-                                {
-                                    ne1_val++;
-                                }
-                        }
+                    } else {	// Not range.
+                        ne1++;
+                        memset(ip_convert, 0, MAXIPBIT);
+                        memcpy(ip_convert, ip_src, MAXIPBIT);
+                        if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT) ) ne1_val++;
+                   }
 
-                    else if(f1 == 1)
+                } else {	// is_not == false.
 
-                        {
-                            eq1++;
-                            //if(is_inrange(ip_src, (unsigned char *)&rulestruct[b].flow_1[i].range, 1))
-                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1))
-                                {
-                                    eq1_val++;
-                                }
+                    if (RuleHead[b].target[0].address[i].maskbits != 0xffffffff) {	// Is range.
+                        eq1++;
+                        if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[0].address[i].ipbits, 1)) eq1_val++;
 
-                        }
-
-                    else if(f1 == 2)
-                        {
-
-                            ne1++;
-
-                            memset(ip_convert, 0, MAXIPBIT);
-                            memcpy(ip_convert, ip_src, MAXIPBIT);
-
-                            //if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT) )
-                            if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT) )
-                                {
-                                    ne1_val++;
-                                }
-                        }
-
-                    else if(f1 == 3)
-                        {
-				//Sagan_Log(NORMAL, "\t\tFlow: confirmed address type 3...", b);
-
-                            eq1++;
-
-                            memset(ip_convert, 0, MAXIPBIT);
-                            memcpy(ip_convert, ip_src, MAXIPBIT);
-
-                            //if (!memcmp(ip_convert, rulestruct[b].flow_1[i].range.ipbits, MAXIPBIT))
-                            if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT))
-                                {
-
-					//Sagan_Log(NORMAL, "\t\tFlow: bad memory copy?", b);
-                                    eq1_val++;
-                                }
-                        }
-                }
-        }
-    else
-        {
-            a1=1;
-        }
+                    } else {	// Not range.
+                        eq1++;
+                        memset(ip_convert, 0, MAXIPBIT);
+                        memcpy(ip_convert, ip_src, MAXIPBIT);
+                        if (!memcmp(ip_convert, RuleHead[b].target[0].address[i].ipbits, MAXIPBIT)) eq1_val++;
+                    }
+               }
+          }
+    }
+    else a1=1;	// any_address == true.
 
     /* if ne1, did anything match (meaning failed) */
 
-    if(ne1>0)
-        {
-            if(ne1_val > 0)
-                {
-                    failed++;
-                }
-        }
+    if(ne1>0) {
+        if(ne1_val > 0) failed++;
+    }
 
     /* if eq1, did anything not match meaning failed */
 
-    if(eq1>0)
-        {
-            if(eq1_val < 1)
-                {
-                    failed++;
-                }
-        }
+    if(eq1>0) {
+        if(eq1_val < 1) failed++;
+    }
 
     /* if either failed, we did not match, no need to check the second flow... we already failed! */
 
-    if(a1 != 1)
-        {
-
-            if(failed > 0)
-                {
-                    return 0;
-                }
-        }
+    if(a1 != 1) {
+        if(failed > 0) return 0;
+    }
 
     /*Begin port_1*/
 
     //if(rulestruct[b].port_1_var != 0)
-    if(RuleHead[b].target[0].any_port == false)
-        {
-            for(i=0; i < RuleHead[b].target[0].port_count; i++)
-                {
-                    u++;
-                    g1 = RuleHead[b].target[0].port[u].keyword;	// Why 'u'?
+    if(RuleHead[b].target[0].any_port == false) {
+        for(i=0; i < RuleHead[b].target[0].port_count; i++) {
+            u++;
+            if (RuleHead[b].target[0].port[u].is_not == true) {
 
-                    if(g1 == 0)
-                        {
-                            ne3++;
-                            if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high)
-                                {
-                                    ne3_val++;
-                                }
-                        }
+                if (RuleHead[b].target[0].port[u].high == RuleHead[b].target[0].port[u].low) {	// Not range.
+                    ne3++;
+                    if(port_src == RuleHead[b].target[0].port[i].low) ne3_val++;
 
-                    if(g1 == 1)
-                        {
-                            eq3++;
-                            if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high)
-                                {
-                                    eq3_val++;
-                                }
-                        }
-
-                    if(g1 == 2)
-                        {
-                            ne3++;
-                            if(port_src == RuleHead[b].target[0].port[i].low)
-                                {
-                                    ne3_val++;
-                                }
-                        }
-
-                    if(g1 == 3)
-                        {
-                            eq3++;
-                            if(port_src == RuleHead[b].target[0].port[i].low)
-                                {
-                                    eq3_val++;
-                                }
-                        }
+                } else {	// Is range.
+                    ne3++;
+                    if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high) ne3_val++;
                 }
-        }
-    else
-        {
-            b1=1;
-        }
+
+            } else {	// is_not == false.
+
+                if (RuleHead[b].target[0].port[u].high == RuleHead[b].target[0].port[u].low) {	// Not range.
+                    eq3++;
+                    if(port_src == RuleHead[b].target[0].port[i].low) eq3_val++;
+
+                } else {	// Is range.
+                    eq3++;
+                    if(port_src >= RuleHead[b].target[0].port[i].low && port_src <= RuleHead[b].target[0].port[i].high) eq3_val++;
+                }
+
+            }	// is_not.
+        }	// for port_count.
+    } else b1=1;	// any_port == true.
 
     /* if ne3, did anything match (meaning failed) */
 
-    if(ne3>0)
-        {
-            if(ne3_val > 0)
-                {
-                    failed++;
-                }
-        }
+    if(ne3>0) {
+        if(ne3_val > 0) failed++;
+    }
 
     /* if eq3, did anything not match meaning failed */
 
-    if(eq3>0)
-        {
-            if(eq3_val < 1)
-                {
-                    failed++;
-                }
-        }
+    if(eq3>0) {
+        if(eq3_val < 1) failed++;
+    }
 
     /* if either failed, we did not match, no need to check the second flow... we already failed! */
 
-    if(b1 != 1)
-        {
-            if(failed > 0)
-                {
-                    return 0;
-                }
-        }
+    if(b1 != 1) {
+        if(failed > 0) return 0;
+    }
 
 
 
     /* Begin flow_2 */
 
-    if(RuleHead[b].target[1].any_address == false)
-        {
+    if(RuleHead[b].target[1].any_address == false) {
 
-            for(i=0; i < RuleHead[b].target[1].address_count; i++)
-                {
-                    z++;
-                    f2 = RuleHead[b].target[1].address[z].keyword;
+        for(i=0; i < RuleHead[b].target[1].address_count; i++) {
+			//Sagan_Log(NORMAL, "\tFlow: processing address %d...", i);
+                w++;
+                //f1 = rulestruct[b].flow_1_type[w];
+                //f1 = RuleHead[b].target[1].address[i].type;
+                //f1 = RuleHead[b].target[1].address[i].keyword;	// THIS WILL NOT WORK! FIX IT LATER.
+                if (RuleHead[b].target[1].address[i].is_not == true) {
 
+                    if (RuleHead[b].target[1].address[i].maskbits != 0xffffffff) {	// Is range.
+                            ne1++;
+                            if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1)) ne1_val++;
 
-                    if(f2 == 0)
-                        {
-                            ne2++;
+                    } else {	// Not range.
+                        ne1++;
+                        memset(ip_convert, 0, MAXIPBIT);
+                        memcpy(ip_convert, ip_src, MAXIPBIT);
+                        if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT) ) ne1_val++;
+                   }
 
-                            //if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[0].ipbits, 1))
-                            if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1))
-                                {
-                                    ne2_val++;
-                                }
-                        }
+                } else {	// is_not == false.
 
-                    else if(f2 == 1)
-                        {
-                            eq2++;
+                    if (RuleHead[b].target[1].address[i].maskbits != 0xffffffff) {	// Is range.
+                        eq1++;
+                        if(is_inrange(ip_src, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1)) eq1_val++;
 
-                            //if(is_inrange2(ip_dst, &RuleHead[b].target[1]))
-                            if(is_inrange(ip_dst, (unsigned char *)&RuleHead[b].target[1].address[i].ipbits, 1))
-                                {
-                                    eq2_val++;
-                                }
-                        }
-
-                    else if(f2 == 2)
-                        {
-                            ne2++;
-
-                            memset(ip_convert, 0, MAXIPBIT);
-                            memcpy(ip_convert, ip_dst, MAXIPBIT);
-
-                            if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT ))
-                                {
-                                    ne2_val++;
-                                }
-                        }
-                    else if(f2 == 3)
-                        {
-                            eq2++;
-
-                            memset(ip_convert, 0, MAXIPBIT);
-                            memcpy(ip_convert, ip_dst, MAXIPBIT);
-
-                            if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT ))
-                                {
-                                    eq2_val++;
-                                }
-                        }
-                }
-        }
-    else
-        {
-            a2=1;
-        }
+                    } else {	// Not range.
+                        eq1++;
+                        memset(ip_convert, 0, MAXIPBIT);
+                        memcpy(ip_convert, ip_src, MAXIPBIT);
+                        if (!memcmp(ip_convert, RuleHead[b].target[1].address[i].ipbits, MAXIPBIT)) eq1_val++;
+                    }
+               }
+          }
+    } else a2=1;	// any_address == true.
 
     /* if ne2, did anything match (meaning failed) */
 
-    if(ne2>0)
-        {
-            if(ne2_val > 0)
-                {
-                    failed++;
-                }
-        }
+    if(ne2>0) {
+        if(ne2_val > 0) failed++;
+    }
 
     /* if eq2, did anything not match meaning failed */
 
-    if(eq2>0)
-        {
-            if(eq2_val < 1)
-                {
-                    failed++;
-                }
-        }
+    if(eq2>0) {
+        if(eq2_val < 1) failed++;
+    }
 
     /* if either failed, we did not match, leave */
 
-    if(a2 != 1)
-        {
-            if(failed > 0)
-                {
-                    return 0;
-                }
-        }
+    if(a2 != 1) {
+        if(failed > 0) return 0;
+    }
 
     /*Begin port_2*/
 
-    if(RuleHead[b].target[1].any_port == false)
-        {
-            for(i=0; i < RuleHead[b].target[1].port_count; i++)
-                {
-                    v++;
-                    g2 = RuleHead[b].target[1].port[v].keyword;
+    if(RuleHead[b].target[1].any_port == false) {
+        for(i=0; i < RuleHead[b].target[1].port_count; i++) {
+            u++;
+            if (RuleHead[b].target[1].port[u].is_not == true) {
 
-                    if(g2 == 0)
-                        {
-                            ne4++;
-                            if(port_dst >= RuleHead[b].target[1].port[i].low && port_dst <= RuleHead[b].target[1].port[i].high)
-                                {
-                                    ne4_val++;
-                                }
-                        }
+                if (RuleHead[b].target[1].port[u].high == RuleHead[b].target[1].port[u].low) {	// Not range.
+                    ne3++;
+                    if(port_src == RuleHead[b].target[1].port[i].low) ne3_val++;
 
-                    if(g2 == 1)
-                        {
-                            eq4++;
-                            if(port_dst >= RuleHead[b].target[1].port[i].low && port_dst <= RuleHead[b].target[1].port[i].high)
-                                {
-                                    eq4_val++;
-                                }
-                        }
-
-                    if(g2 == 2)
-                        {
-                            ne4++;
-                            if(port_dst == RuleHead[b].target[1].port[i].low)
-                                {
-                                    ne4_val++;
-                                }
-                        }
-
-                    if(g2 == 3)
-                        {
-                            eq4++;
-                            if(port_dst == RuleHead[b].target[1].port[i].low)
-                                {
-                                    eq4_val++;
-                                }
-                        }
+                } else {	// Is range.
+                    ne3++;
+                    if(port_src >= RuleHead[b].target[1].port[i].low && port_src <= RuleHead[b].target[1].port[i].high) ne3_val++;
                 }
-        }
-    else
-        {
-            b2=1;
-        }
+
+            } else {	// is_not == false.
+
+                if (RuleHead[b].target[1].port[u].high == RuleHead[b].target[1].port[u].low) {	// Not range.
+                    eq3++;
+                    if(port_src == RuleHead[b].target[1].port[i].low) eq3_val++;
+
+                } else {	// Is range.
+                    eq3++;
+                    if(port_src >= RuleHead[b].target[1].port[i].low && port_src <= RuleHead[b].target[1].port[i].high) eq3_val++;
+                }
+
+            }	// is_not.
+        }	// for port_count.
+    } else b2=1;	// any_port == true.
 
     /* if ne4, did anything match (meaning failed) */
 
-    if(ne4>0)
-        {
-            if(ne4_val > 0)
-                {
-                    failed++;
-                }
-        }
+    if(ne4>0) {
+        if(ne4_val > 0) failed++;
+    }
 
     /* if eq4, did anything not match meaning failed */
 
-    if(eq4>0)
-        {
-            if(eq4_val < 1)
-                {
-                    failed++;
-                }
-        }
+    if(eq4>0) {
+        if(eq4_val < 1) failed++;
+    }
 
     /* if either failed, we did not match, no need to check the second flow... we already failed! */
 
-    if(b2 != 1)
-        {
-            if(failed > 0)
-                {
-                    return 0;
-                }
-        }
+    if(b2 != 1) {
+        if(failed > 0) return 0;
+    }
 
     /* If we made it to this point we have a match */
 

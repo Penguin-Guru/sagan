@@ -147,7 +147,7 @@ void Load_Rules( const char *ruleset ) {	// Processes a rulefile.
 				//Sagan_Log(NORMAL, "Load_Rules: LastLine = \"%s\"", LastLine);
 				ParseRule(LastLine, RuleSource);
 				//memset(LastLine, '\0', LastLine_size);	// Reset.
-				strlcpy(LastLine, rulebuf + i, RULEBUF - (strlen(rulebuf) - i));	// Reset and resume parsing of same line;
+				strlcpy(LastLine, rulebuf + i + 1, RULEBUF - (strlen(rulebuf) - i));	// Reset and resume parsing of same line.
 			}
 		}
 		strlcat(LastLine, rulebuf, RULEBUF - strlen(LastLine));	// Rulebuf is sizeof(LastLine).
@@ -192,7 +192,7 @@ void ParseRule(char *rulebuf, char *RuleSource) {
 	char *end;
 	//int ruleset_track_id = 0;
 
-	Sagan_Log(NORMAL, "ParseRule: rulebuf = \"%s\"", rulebuf);
+	//Sagan_Log(NORMAL, "ParseRule: rulebuf = \"%s\"", rulebuf);
 
 	/* Allocate memory for rules: */
 	/* Could reduce memory usage based on actual usage (i.e. not max addresses)? */
@@ -214,7 +214,7 @@ void ParseRule(char *rulebuf, char *RuleSource) {
 	//PrintRuleHeadDebug();
 	//
 	ParseRuleBody(begin + 1, (end - 1) - (begin + 1), RuleSource);	// This will not process content after last ')'. Assuming desirable.
-	PrintRuleBodyDebug();
+	//PrintRuleBodyDebug();
 
 	//ParseRuleTail(end, strlen(rulebuf) - end);	// Could contain meta-data like sid, rev, etc...
 
@@ -229,6 +229,8 @@ void ParseRuleHead(char *rulebuf, int headbuf_length) {
 	//char WordExp[1024];	// Is this a good length?
 	bool NegateNext = false;
 	int WordNumber = 0;
+	unsigned short i;
+	unsigned short Complexity = 0;
 
 	//Sagan_Log(NORMAL, "headbuf_length = %d", headbuf_length);
 	strlcpy(headbuf, rulebuf, headbuf_length);
@@ -285,6 +287,28 @@ void ParseRuleHead(char *rulebuf, int headbuf_length) {
 		//Word = strtok(NULL, " \t\n\v\f\r");	// Get next Word.
 		Word = strtok_r(NULL, " \t\n\v\f\r", &WordNav);	// Get next Word.
 	}	// End Word loop.
+
+	/* Deactivate rules with unusable targeting: *
+	RuleHead[counters->rulecount].is_active = true;
+	for (i=0; i<2; i++) {
+		if (! (RuleHead[counters->rulecount].target[i].any_address == true || RuleHead[counters->rulecount].target[i].address_count > 0)) {
+			RuleHead[counters->rulecount].is_active = false;
+			break;
+		}
+		if (! (RuleHead[counters->rulecount].target[i].any_port == true || RuleHead[counters->rulecount].target[i].port_count > 0)) {
+			RuleHead[counters->rulecount].is_active = false;
+			break;
+		}
+	}*/
+
+	/* Fast-track simpler rules: */
+	if (RuleHead[counters->rulecount].ip_proto > 0) Complexity++;
+	for (i=0; i<2; i++) {
+		if (RuleHead[counters->rulecount].target[i].any_address == false) Complexity++;
+		if (RuleHead[counters->rulecount].target[i].any_port == false) Complexity++;
+	}
+	if (Complexity < 5) RuleHead[counters->rulecount].AllAny = true;
+	else RuleHead[counters->rulecount].AllAny = false;
 
 	//PrintConfigHeadDebug();
 }
@@ -449,6 +473,8 @@ void PrintRuleHeadDebug() {
 	Sagan_Log(NORMAL, "\ndirection: %d", RuleHead[counters->rulecount].direction);
 
 	PrintRuleTargetDebug(1);
+
+	Sagan_Log(NORMAL, "\nAllAny: %s", RuleHead[counters->rulecount].AllAny ? "true" : "false");
 }
 
 void PrintRuleTargetDebug(int TargetNumber) {
@@ -520,54 +546,54 @@ void ParseRuleBody(char *bodybuf, int bb_length, char *RuleSource) {
 		/* Separate stanza at top for any essential keys. All functions should return false (or >0) on failure to allow for contitional breaks. */
 
 //		if (!strcasecmp(Key, "after")) ParseRuleKey_After(&Value, RuleSource);
-//		if (!strcasecmp(Key, "alert_time")) ParseRuleKey_AlertTime(&Value, RuleSource);
-//		if (!strcasecmp(Key, "blacklist")) ParseRuleKey_Blacklist(&Value, RuleSource);
-//		if (!strcasecmp(Key, "bluedot")) ParseRuleKey_Bluedot(&Value, RuleSource);
-//		if (!strcasecmp(Key, "zeek-intel")) ParseRuleKey_ZeekIntel(&Value, RuleSource);
-		if (!strcasecmp(Key, "classtype")) ParseRuleKey_Classtype(&Value, RuleSource);
-		if (!strcasecmp(Key, "content")) ParseRuleKey_Content(&Value, RuleSource);
-//		if (!strcasecmp(Key, "country_code")) ParseRuleKey_CountryCode(&Value, RuleSource);
-//		if (!strcasecmp(Key, "default_proto")) ParseRuleKey_DefaultProto(&Value, RuleSource);
-//		if (!strcasecmp(Key, "default_dst_port")) ParseRuleKey_DefaultDstPort(&Value, RuleSource);
-//		if (!strcasecmp(Key, "default_src_port")) ParseRuleKey_DefaultSrcPort(&Value, RuleSource);
-//		if (!strcasecmp(Key, "depth")) ParseRuleKey_Depth(&Value, RuleSource);
-//		if (!strcasecmp(Key, "distance")) ParseRuleKey_Distance(&Value, RuleSource);
-//		if (!strcasecmp(Key, "dynamic_load")) ParseRuleKey_DynamicLoad(&Value, RuleSource);
-//		if (!strcasecmp(Key, "email")) ParseRuleKey_Email(&Value, RuleSource);
-//		if (!strcasecmp(Key, "external")) ParseRuleKey_External(&Value, RuleSource);
-//		if (!strcasecmp(Key, "syslog_facility")) ParseRuleKey_SyslogFacility(&Value, RuleSource);
-//		if (!strcasecmp(Key, "flexbits")) ParseRuleKey_Flexbits(&Value, RuleSource);
-//		if (!strcasecmp(Key, "flexbits_pause")) ParseRuleKey_FlexbitsPause(&Value, RuleSource);
-//		if (!strcasecmp(Key, "fwsam")) ParseRuleKey_FwSam(&Value, RuleSource);
-//		if (!strcasecmp(Key, "syslog_level")) ParseRuleKey_SyslogLevel(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_content")) ParseRuleKey_MetaContent(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_depth")) ParseRuleKey_MetaDepth(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_distance")) ParseRuleKey_MetaDistance(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_offset")) ParseRuleKey_MetaOffset(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_nocase")) ParseRuleKey_MetaNoCase(&Value, RuleSource);
-//		if (!strcasecmp(Key, "meta_within")) ParseRuleKey_MetaWithin(&Value, RuleSource);
-		if (!strcasecmp(Key, "msg")) ParseRuleKey_Msg(&Value, RuleSource);
-//		if (!strcasecmp(Key, "nocase")) ParseRuleKey_NoCase(&Value, RuleSource);
-//		if (!strcasecmp(Key, "normalize")) ParseRuleKey_Normalize(&Value, RuleSource);
-//		if (!strcasecmp(Key, "offset")) ParseRuleKey_Offset(&Value, RuleSource);
-//		if (!strcasecmp(Key, "parse_dst_ip")) ParseRuleKey_ParseDstIp(&Value, RuleSource);
-		if (!strcasecmp(Key, "parse_port")) ParseRuleKey_ParsePort(&Value, RuleSource);
-		if (!strcasecmp(Key, "parse_proto")) ParseRuleKey_ParseProto(&Value, RuleSource);
-		if (!strcasecmp(Key, "parse_proto_program")) ParseRuleKey_ParseProtoProgram(&Value, RuleSource);
-//		if (!strcasecmp(Key, "parse_hash")) ParseRuleKey_ParseHash(&Value, RuleSource);
-//		if (!strcasecmp(Key, "parse_src_ip")) ParseRuleKey_ParseSrcIp(&Value, RuleSource);
-//		if (!strcasecmp(Key, "pcre")) ParseRuleKey_Pcre(&Value, RuleSource);
-//		if (!strcasecmp(Key, "priority")) ParseRuleKey_Priority(&Value, RuleSource);
-		if (!strcasecmp(Key, "program")) ParseRuleKey_Program(&Value, RuleSource);
-//		if (!strcasecmp(Key, "reference")) ParseRuleKey_Reference(&Value, RuleSource);
-		if (!strcasecmp(Key, "rev")) ParseRuleKey_Rev(&Value, RuleSource);
-		if (!strcasecmp(Key, "sid")) ParseRuleKey_Sid(&Value, RuleSource);
-//		if (!strcasecmp(Key, "syslog_tag")) ParseRuleKey_SyslogTag(&Value, RuleSource);
-//		if (!strcasecmp(Key, "threshold")) ParseRuleKey_Threshold(&Value, RuleSource);
-//		if (!strcasecmp(Key, "within")) ParseRuleKey_Within(&Value, RuleSource);
-//		if (!strcasecmp(Key, "xbits")) ParseRuleKey_Xbits(&Value, RuleSource);
-//		if (!strcasecmp(Key, "xbits_pause")) ParseRuleKey_XbitsPause(&Value, RuleSource);
-//		if (!strcasecmp(Key, "xbits_upause")) ParseRuleKey_XbitsUpause(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "alert_time")) ParseRuleKey_AlertTime(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "blacklist")) ParseRuleKey_Blacklist(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "bluedot")) ParseRuleKey_Bluedot(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "zeek-intel")) ParseRuleKey_ZeekIntel(&Value, RuleSource);
+		if (!strcasecmp(Key, "classtype")) ParseRuleKey_Classtype(&Value, RuleSource);	// Would be if else.
+		else if (!strcasecmp(Key, "content")) ParseRuleKey_Content(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "country_code")) ParseRuleKey_CountryCode(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "default_proto")) ParseRuleKey_DefaultProto(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "default_dst_port")) ParseRuleKey_DefaultDstPort(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "default_src_port")) ParseRuleKey_DefaultSrcPort(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "depth")) ParseRuleKey_Depth(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "distance")) ParseRuleKey_Distance(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "dynamic_load")) ParseRuleKey_DynamicLoad(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "email")) ParseRuleKey_Email(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "external")) ParseRuleKey_External(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "syslog_facility")) ParseRuleKey_SyslogFacility(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "flexbits")) ParseRuleKey_Flexbits(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "flexbits_pause")) ParseRuleKey_FlexbitsPause(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "fwsam")) ParseRuleKey_FwSam(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "syslog_level")) ParseRuleKey_SyslogLevel(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_content")) ParseRuleKey_MetaContent(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_depth")) ParseRuleKey_MetaDepth(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_distance")) ParseRuleKey_MetaDistance(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_offset")) ParseRuleKey_MetaOffset(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_nocase")) ParseRuleKey_MetaNoCase(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "meta_within")) ParseRuleKey_MetaWithin(&Value, RuleSource);
+		else if (!strcasecmp(Key, "msg")) ParseRuleKey_Msg(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "nocase")) ParseRuleKey_NoCase(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "normalize")) ParseRuleKey_Normalize(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "offset")) ParseRuleKey_Offset(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "parse_dst_ip")) ParseRuleKey_ParseDstIp(&Value, RuleSource);
+		else if (!strcasecmp(Key, "parse_port")) ParseRuleKey_ParsePort(&Value, RuleSource);
+		else if (!strcasecmp(Key, "parse_proto")) ParseRuleKey_ParseProto(&Value, RuleSource);
+		else if (!strcasecmp(Key, "parse_proto_program")) ParseRuleKey_ParseProtoProgram(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "parse_hash")) ParseRuleKey_ParseHash(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "parse_src_ip")) ParseRuleKey_ParseSrcIp(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "pcre")) ParseRuleKey_Pcre(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "priority")) ParseRuleKey_Priority(&Value, RuleSource);
+		else if (!strcasecmp(Key, "program")) ParseRuleKey_Program(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "reference")) ParseRuleKey_Reference(&Value, RuleSource);
+		else if (!strcasecmp(Key, "rev")) ParseRuleKey_Rev(&Value, RuleSource);
+		else if (!strcasecmp(Key, "sid")) ParseRuleKey_Sid(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "syslog_tag")) ParseRuleKey_SyslogTag(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "threshold")) ParseRuleKey_Threshold(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "within")) ParseRuleKey_Within(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "xbits")) ParseRuleKey_Xbits(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "xbits_pause")) ParseRuleKey_XbitsPause(&Value, RuleSource);
+//		else if (!strcasecmp(Key, "xbits_upause")) ParseRuleKey_XbitsUpause(&Value, RuleSource);
 
 
 		Declaration = strtok_r(NULL, ";", &DeclarationNav);	// Get next Declaration.
@@ -631,6 +657,7 @@ bool ParseRuleKey_Content(char *Value, char *RuleSource) {
 bool ParseRuleKey_Msg(char *Value, char *RuleSource) {
 	char tmp[RULEBUF] = { 0 };
 
+	//Sagan_Log(NORMAL, "ParseRuleKey_Msg: Value = \"%s\"", Value);
 	Between_Quotes(Value, tmp, sizeof(tmp));
 	if (tmp[0] == '\0') {
 		Sagan_Log(WARN, "[%s, line %d] Null \"msg\" field within quotes. See: %s ", __FILE__, __LINE__, RuleSource);

@@ -50,7 +50,7 @@
 #include "sagan-config.h"
 
 struct _SaganConfig *config;
-struct _Rule_Struct *rulestruct;
+struct RuleBody *RuleBody;
 struct _SaganDebug *debug;
 struct _SaganCounters *counters;
 struct _Sagan_GeoIP_Skip *GeoIP_Skip;
@@ -164,12 +164,12 @@ int GeoIP2_Lookup_Country( char *ipaddr, int rule_position )
         }
 
     strlcpy(country, entry_data.utf8_string, 3);
-    strlcpy(tmp, rulestruct[rule_position].geoip2_country_codes, sizeof(tmp));
+    strlcpy(tmp, RuleBody[rule_position].GeoIP.geoip2_country_codes, sizeof(tmp));
 
     if (debug->debuggeoip2)
         {
             Sagan_Log(DEBUG, "GeoIP Lookup IP  : %s", ipaddr);
-            Sagan_Log(DEBUG, "Country Codes    : |%s|", rulestruct[rule_position].geoip2_country_codes);
+            Sagan_Log(DEBUG, "Country Codes    : |%s|", RuleBody[rule_position].GeoIP.geoip2_country_codes);
             Sagan_Log(DEBUG, "Found in GeoIP DB: %s", country);
         }
 

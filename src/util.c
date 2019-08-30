@@ -1429,7 +1429,7 @@ int Netaddr_To_Range( char *ipstr, unsigned char *out )
     int mask;
     char *t = NULL;
     char _t = '\0';
-    int maxmask = NULL != strchr(ipstr, ':') ? 128 : 32;	// Ver. 6|4. Isn't this backward?
+    int maxmask = NULL != strchr(ipstr, ':') ? 128 : 32;	// Ver. 6|4.
 
 
     //Sagan_Log(NORMAL, "ipstr = \"%s\".", ipstr);
