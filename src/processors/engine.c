@@ -1015,7 +1015,7 @@ int Sagan_Engine ( _Sagan_Proc_Syslog *SaganProcSyslog_LOCAL, bool dynamic_rule_
                                         {
 
                                             check_flow_return = Check_Flow( b, proto, ip_src_bits, ip_srcport_u32, ip_dst_bits, ip_dstport_u32);
-                                            if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] DebugFlow: check_flow_return = \"%s\"", check_flow_return ? "true" : "false");
+                                            if (debug->debugflow) Sagan_Log(DEBUG, "[%s, line %d] DebugFlow: check_flow_return = \"%s\"", __FILE__, __LINE__, check_flow_return ? "true" : "false");
 
                                             if(check_flow_return == false)
                                                 {

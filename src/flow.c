@@ -132,7 +132,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
     char dbg_SampleAddress[INET_ADDRSTRLEN];
     char dbg_SampleMask[INET_ADDRSTRLEN];
 
-    if (debug->debugflow) Sagan_Log(DEBUG, "\tDebugFlow: Processing rule with ruleset_id %d...", RuleHead[b].ruleset_id);
+    if (debug->debugflow) Sagan_Log(DEBUG, "DebugFlow: Processing rule with ruleset_id %d...", RuleHead[b].ruleset_id);
 
     /*Begin ip_proto*/
 
@@ -360,7 +360,7 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
         if(failed > 0) return 0;
     }
 
-    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Target %d address(es) matched.", b);
+    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: ruleset_id %d address(es) matched.", b);
 
     /*Begin port_2*/
 
