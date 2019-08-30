@@ -137,17 +137,17 @@ bool Check_Flow( int b, int ip_proto, unsigned char *ip_src_bits, int normalize_
     /*Begin ip_proto*/
 
     if(RuleHead[b].ip_proto > 0) {	// Match explicit.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Explicit protocol.");
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Explicit protocol.", __FILE__, __LINE__);
         if (ip_proto == RuleHead[b].ip_proto) {
             c1=1;
         } else if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Failed to match protocol: sample=%d ; target=%d", __FILE__, __LINE__, ip_proto, RuleHead[b].ip_proto);
     } else {	// Match any.
-        if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: any protocol.");
+        if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: any protocol.", __FILE__, __LINE__);
         c1=1;
     }
 
     if(c1 != 1) return 0;	// Unmatched protocol.
-    if (debug->debugflow == true) Sagan_Log(DEBUG, "\tDebugFlow: Protocol matched.");
+    if (debug->debugflow == true) Sagan_Log(DEBUG, "[%s, line %d] \tDebugFlow: Protocol matched.", __FILE__, __LINE__);
 
     /*Begin flow_1*/
 
