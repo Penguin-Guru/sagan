@@ -118,7 +118,7 @@ void Usage(void)
 #endif
 
 #ifdef WITH_SYSSTRSTR
-    fprintf(stderr, "* Using Sagan's built in 'strstr' function.\n");	// Isn't this backward?
+    fprintf(stderr, "* Using Sagan's built in 'strstr' function.\n");
 #endif
 
 #ifdef PCRE_HAVE_JIT
