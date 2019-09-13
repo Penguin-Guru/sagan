@@ -72,6 +72,7 @@ void Statistics( void )
     unsigned long bluedot_hash_total=0;
     unsigned long bluedot_url_total=0;
     unsigned long bluedot_filename_total=0;
+    unsigned long bluedot_ja3_total=0;
 #endif
 
 
@@ -137,7 +138,9 @@ void Statistics( void )
 #ifdef HAVE_LIBMAXMINDDB
             Sagan_Log(NORMAL, "           GeoIP Hits:                : %" PRIu64 " (%.3f%%)", counters->geoip2_hit, CalcPct( counters->geoip2_hit, counters->events_received) );
             Sagan_Log(NORMAL, "           GeoIP Lookups:             : %" PRIu64 "", counters->geoip2_lookup);
-            Sagan_Log(NORMAL, "           GeoIP Misses               : %" PRIu64 "", counters->geoip2_miss);
+            Sagan_Log(NORMAL, "           GeoIP Errors               : %" PRIu64 "", counters->geoip2_error);
+#
+
 #endif
 
             uptime_days = seconds / 86400;
@@ -284,6 +287,14 @@ void Statistics( void )
                     Sagan_Log(NORMAL, "          Filename hits from cache        : %" PRIu64 " (%.3f%%)", counters->bluedot_filename_cache_hit, CalcPct(counters->bluedot_filename_cache_hit, counters->bluedot_filename_cache_count));
                     Sagan_Log(NORMAL, "          Filename/Bluedot hits in logs   : %" PRIu64 "", counters->bluedot_filename_positive_hit);
                     Sagan_Log(NORMAL, "          URL queries per/second          : %lu (%" PRIu64 "/%" PRIu64 ")", bluedot_filename_total, counters->bluedot_filename_queue_current, config->bluedot_filename_queue);
+		    Sagan_Log(NORMAL, "");
+
+                    Sagan_Log(NORMAL, "          * TLS/JA3 Reputation *");
+                    Sagan_Log(NORMAL, "");
+                    Sagan_Log(NORMAL, "          JA3 in cache                    : %" PRIu64 " (%.3f%%)", counters->bluedot_ja3_cache_count, CalcPct(counters->bluedot_ja3_cache_count, config->bluedot_ja3_max_cache));
+                    Sagan_Log(NORMAL, "          JA3 hits from cache             : %" PRIu64 " (%.3f%%)", counters->bluedot_ja3_cache_hit, CalcPct(counters->bluedot_ja3_cache_hit, counters->bluedot_ja3_cache_count));
+                    Sagan_Log(NORMAL, "          JA3/Bluedot hits in logs        : %" PRIu64 "", counters->bluedot_ja3_positive_hit);
+                    Sagan_Log(NORMAL, "          JA3 queries per/second          : %lu (%" PRIu64 "/%" PRIu64 ")", bluedot_ja3_total, counters->bluedot_ja3_queue_current, config->bluedot_ja3_queue);
 
                     Sagan_Log(NORMAL, "");
                     Sagan_Log(NORMAL, "          * Bluedot Combined Statistics *");

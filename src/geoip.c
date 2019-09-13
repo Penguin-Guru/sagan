@@ -140,20 +140,21 @@ int GeoIP2_Lookup_Country( char *ipaddr, int rule_position )
 
     res = MMDB_get_value(&result.entry, &entry_data, "country", "iso_code", NULL);
 
+    __atomic_add_fetch(&counters->geoip2_lookup, 1, __ATOMIC_SEQ_CST);
+
     if (res != MMDB_SUCCESS)
         {
 
-            __atomic_add_fetch(&counters->geoip2_miss, 1, __ATOMIC_SEQ_CST);
-
             Sagan_Log(WARN, "Country code MMDB_get_value failure (%s) for %s.", MMDB_strerror(res), ipaddr);
+	
+            __atomic_add_fetch(&counters->geoip2_error, 1, __ATOMIC_SEQ_CST);
+
             return(GEOIP_SKIP);
 
         }
 
-    if (!entry_data.has_data || entry_data.type != MMDB_DATA_TYPE_UTF8_STRING)
+    if ( !entry_data.has_data || entry_data.type != MMDB_DATA_TYPE_UTF8_STRING )
         {
-
-            __atomic_add_fetch(&counters->geoip2_miss, 1, __ATOMIC_SEQ_CST);
 
             if ( debug->debuggeoip2 )
                 {
